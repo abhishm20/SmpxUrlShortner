@@ -1,0 +1,33 @@
+create database smpxUrlShortner;
+use smpxUrlShortner;
+
+CREATE TABLE IF NOT EXISTS `smpxUrlShortner`.`urls` (
+  `url_id` INT NOT NULL AUTO_INCREMENT COMMENT '',
+  `short_url` VARCHAR(100) NOT NULL COMMENT '',
+  `long_url` VARCHAR(500) NOT NULL COMMENT '',
+  `created` TIMESTAMP NOT NULL COMMENT '',
+  `is_active` TINYINT(1) NULL DEFAULT 1 COMMENT '',
+  `clicks` INT NULL DEFAULT 0 COMMENT '',
+  PRIMARY KEY (`url_id`)  COMMENT '',
+  UNIQUE INDEX `short_url_UNIQUE` (`short_url` ASC)  COMMENT '',
+  UNIQUE INDEX `long_url_UNIQUE` (`long_url` ASC)  COMMENT '')
+ENGINE = InnoDB
+
+
+
+CREATE TABLE IF NOT EXISTS `smpxUrlShortner`.`url_hits` (
+  `hit_id` INT NOT NULL COMMENT '',
+  `time` TIMESTAMP NULL COMMENT '',
+  `device` VARCHAR(100) NULL COMMENT '',
+  `platform` VARCHAR(100) NULL COMMENT '',
+  `browser` VARCHAR(100) NULL COMMENT '',
+  `header` VARCHAR(500) NULL COMMENT '',
+  `url_id` INT NOT NULL COMMENT '',
+  PRIMARY KEY (`hit_id`)  COMMENT '',
+  INDEX `fk_url_hits_urls_idx` (`url_id` ASC)  COMMENT '',
+  CONSTRAINT `fk_url_hits_urls`
+    FOREIGN KEY (`url_id`)
+    REFERENCES `smpxUrlShortner`.`urls` (`url_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
