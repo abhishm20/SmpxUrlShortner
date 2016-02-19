@@ -16,9 +16,11 @@ class CreateHitsTable extends Migration
             $table->increments('id');
             $table->string('platform');
             $table->string('device');
-            $table->timestamp('time')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
             $table->string('browser');
             $table->string('language');
+            $table->string('client_ip');
             $table->integer('url_id');
             $table->index('url_id');
         });

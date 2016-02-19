@@ -11,6 +11,10 @@ use Hashids\Hashids;
  * |
  */
 
+Route::get('/', function(){
+	return view('index');
+});
+
 Route::get('/generate/{count}', function($count){
 	$hashids = new Hashids('smpx', 6);
 	echo $hashids->encode($count);
@@ -20,7 +24,11 @@ Route::resource ( '/urls', 'UrlController', ['only' => [
     'index', 'show', 'create', 'store', 'edit', 'destroy', 'update']]
 );
 
-Route::get ( '/{shortUrl}', 'UrlController@redirect');
+Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
+
+Route::get('/urls/from/{from}', 'UrlController@getLimitedUrlsUsingFrom');
+
+Route::get('/{shortUrl}', 'UrlController@redirect');
 
 /*
  * |--------------------------------------------------------------------------
