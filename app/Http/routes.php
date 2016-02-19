@@ -1,5 +1,6 @@
 <?php
 use Hashids\Hashids;
+use Illuminate\Http\Request;
 /*
  * |--------------------------------------------------------------------------
  * | Routes File
@@ -13,6 +14,14 @@ use Hashids\Hashids;
 
 Route::get('/', function(){
 	return view('index');
+});
+
+Route::get('/demo', function(){
+	return response('Cookie set!')->withCookie(cookie('name', 'my value', 60));
+
+});
+Route::get('/check', function(Request $request){
+	return $request->cookie('name');
 });
 
 Route::get('/generate/{count}', function($count){
@@ -42,5 +51,5 @@ Route::get('/{shortUrl}', 'UrlController@redirect');
  */
 
 Route::group(['middleware' => ['web']], function () {
-	
+
 } );
