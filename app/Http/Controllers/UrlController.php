@@ -8,23 +8,24 @@ use App\Url;
 use App\Http\Controllers\Controller;
 use Jenssegers\Agent\Agent;
 use PhpParser\Node\Expr\Cast\Object_;
-
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 class UrlController extends Controller
 {
-	
-	/* 
-	 * Return limited url range $from $to
-	 */
+
+	/*
+	* Return limited url range $from $to
+	*/
 	public function getLimitedUrls($from, $to){
 		if($from > $to){
 			echo "Invalid Query";
 			return;
 		}
-			$urls = Url::take($to)->skip($from)->get();
-			echo $urls->toJson();
+		$urls = Url::take($to)->skip($from)->get();
+		echo $urls->toJson();
 	}
-	
-	
+
+
 	public function getLimitedUrlsUsingFrom($from){
 		$count = Url::count();
 		if($count <= $from){
@@ -35,16 +36,16 @@ class UrlController extends Controller
 		$urls = Url::skip($from)->take($limit)->get();
 		echo $urls->toJson();
 	}
-	
-	
+
+
 	/**
-	 * Redirect to long url
-	 * @return rediect to long url 
-	 */
+	* Redirect to long url
+	* @return rediect to long url
+	*/
 	public function redirect(Request $request, $shortUrl){
 		$agent = new Agent();
 		$agent->setUserAgent($request->headers);
-		
+
 		$urls = Url::where('short_url', '=', config('app.url'). '/' . $shortUrl)->get();
 		if(!$urls->first())
 		{
@@ -53,148 +54,172 @@ class UrlController extends Controller
 		}
 		$url = $urls[0];
 		$longUrl = $url['long_url'];
-		
-		
+
+		try {
+			// Generate a version 1 (time-based) UUID object
+			if(!isset($_COOKIE['_id'])){
+				$cookieUuid1 = Uuid::uuid1();
+				setcookie('_id', $cookieUuid1->toString(), time() + 10 * 365 * 24 * 3600, "/");
+			}else{
+				$cookieUuid1 = $_COOKIE['_id'];
+			}
+			if(!isset($_COOKIE['_sid'])){
+				$sessionUuid1 = Uuid::uuid1();
+				setcookie('_sid', $sessionUuid1->toString(), 0, "/");
+			}else{
+				$sessionUuid1 = $_COOKIE['_sid'];
+			}
+		} catch (UnsatisfiedDependencyException $e){
+			// Some dependency was not met. Either the method cannot be called on a
+			// 32-bit system, or it can, but it relies on Moontoast\Math to be present.
+			echo 'Caught exception: ' . $e->getMessage() . "\n";
+		}
+
 		$url->clicks = $url['clicks'] +1;
 		$url->save();
 		$url->hits()->create([
-				'client_ip' => $_SERVER['REMOTE_ADDR'],
-				'language' => $agent->languages()[0],
-				'device' => $agent->device(),
-				'platform' => $agent->platform(),
-				'browser' => $agent->browser()
+			'client_ip' => $_SERVER['REMOTE_ADDR'],
+			'language' => $agent->languages()[0],
+			'device' => $agent->device(),
+			'platform' => $agent->platform(),
+			'browser' => $agent->browser(),
+			'cookie_id' => $cookieUuid1,
+			'session_id' => $sessionUuid1
 		]);
-		
+
 		$shortQuery = $request->all();
 
 		$parsedLongUrl = parse_url($longUrl);
-		
+
 		if(isset($parsedLongUrl["query"])){
 			parse_str($parsedLongUrl["query"], $longQuery);
-			
+
 			$commonKeys = array_intersect_key($longQuery, $shortQuery);
-			
+
 			$finalQuery = array_diff($shortQuery, $commonKeys) + array_diff($longQuery, $commonKeys) + $commonKeys;
-			
+
 			if(isset($parsedLongUrl['port']))
-				return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . ':' . $parsedLongUrl['port'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
-			else 
-				return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
+			return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . ':' . $parsedLongUrl['port'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
+			else
+			return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
 		}else{
 			if(empty($shortQuery))
-				return redirect($longUrl);
-			else 
-				return redirect($longUrl . '?' . http_build_query($shortQuery));
+			return redirect($longUrl);
+			else
+			return redirect($longUrl . '?' . http_build_query($shortQuery));
 		}
-		
-		
-		
 	}
-	
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
-    {
-        $urls = Url::all();
-        $res = new \stdClass();
-        $res->count = $urls->count();
-        $res->status = "success";
-        $res->data = $urls;
-        echo json_encode($res);
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-    	echo "done";
-    	//
-    }
+	/**
+	* Display a listing of the resource.
+	*
+	* @return \Illuminate\Http\Response
+	*/
+	public function index(Request $request)
+	{
+		$urls = Url::all();
+		$res = new \stdClass();
+		$res->count = $urls->count();
+		$res->status = "success";
+		$res->data = $urls;
+		echo json_encode($res);
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {	
-    	$count = Url::max('id');
-    	if(!isset($count))
-    		$count = 0;
-    	
-    	$hashids = new Hashids('smpx', 6);
-    	$hashed_url = $hashids->encode($count++);
-    	
-    	$longUrl = trim($request["long_url"]);
-    	
-    	if(strlen($longUrl) <= 0){
-    		echo 'Invalid Url';
-    		return;
-    	}
-    	if(substr( $longUrl, 0, 7 ) !== "http://" and substr( $longUrl, 0, 8 ) !== "https://"){
-    		$longUrl = 'http://' . $longUrl ;
-    	}
-    	
-    	$array = array(
-    			'long_url' => $longUrl,
-    			'short_url' => config('app.url'). '/' . $hashed_url,
-    			'is_active' => true,
-    			'clicks' => 0
-    	);
-       	$urlInstance = Url::create($array);
-       	echo $urlInstance->toJson();
-       	return;
-    }
+	/**
+	* Show the form for creating a new resource.
+	*
+	* @return \Illuminate\Http\Response
+	*/
+	public function create(Request $request)
+	{
+		echo "done";
+		//
+	}
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+	/**
+	* Store a newly created resource in storage.
+	*
+	* @param  \Illuminate\Http\Request  $request
+	* @return \Illuminate\Http\Response
+	*/
+	public function store(Request $request)
+	{
+		$count = Url::max('id');
+		if(!isset($count))
+		$count = 0;
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+		if(!isset($request["customKey"])){
+			$hashids = new Hashids('smpx', 6);
+			$hashed_url = $hashids->encode($count++);
+		}else{
+			$hashed_url = $request["customKey"];
+		}
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+		$longUrl = trim($request["long_url"]);
+
+		if(strlen($longUrl) <= 0){
+			echo 'Invalid Url';
+			return;
+		}
+		if(substr( $longUrl, 0, 7 ) !== "http://" and substr( $longUrl, 0, 8 ) !== "https://"){
+			$longUrl = 'http://' . $longUrl ;
+		}
+
+		$array = array(
+			'long_url' => $longUrl,
+			'short_url' => config('app.url'). '/' . $hashed_url,
+			'is_active' => true,
+			'clicks' => 0,
+			'cotegory' => $request["cotegory"]
+		);
+		$urlInstance = Url::create($array);
+		echo $urlInstance->toJson();
+		return;
+	}
+
+	/**
+	* Display the specified resource.
+	*
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function show($id)
+	{
+		//
+	}
+
+	/**
+	* Show the form for editing the specified resource.
+	*
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function edit($id)
+	{
+		//
+	}
+
+	/**
+	* Update the specified resource in storage.
+	*
+	* @param  \Illuminate\Http\Request  $request
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function update(Request $request, $id)
+	{
+		//
+	}
+
+	/**
+	* Remove the specified resource from storage.
+	*
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function destroy($id)
+	{
+		//
+	}
 }

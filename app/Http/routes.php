@@ -1,6 +1,8 @@
 <?php
 use Hashids\Hashids;
 use Illuminate\Http\Request;
+
+
 /*
  * |--------------------------------------------------------------------------
  * | Routes File
@@ -12,32 +14,51 @@ use Illuminate\Http\Request;
  * |
  */
 
-Route::get('/', function(){
-	return view('index');
-});
+ Route::get('/', function(){
+ 	return view('index');
+ });
 
-Route::get('/demo', function(){
-	return response('Cookie set!')->withCookie(cookie('name', 'my value', 60));
+ Route::get('/generate/{count}', function($count){
+ 	$hashids = new Hashids('smpx', 6);
+ 	echo $hashids->encode($count);
+ });
 
-});
-Route::get('/check', function(Request $request){
-	return $request->cookie('name');
-});
-
-Route::get('/generate/{count}', function($count){
-	$hashids = new Hashids('smpx', 6);
-	echo $hashids->encode($count);
-});
-
-Route::resource ( '/urls', 'UrlController', ['only' => [
+ Route::resource ( '/urls', 'UrlController', ['only' => [
     'index', 'show', 'create', 'store', 'edit', 'destroy', 'update']]
-);
+ );
 
-Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
+ Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
 
-Route::get('/urls/from/{from}', 'UrlController@getLimitedUrlsUsingFrom');
+ Route::get('/urls/from/{from}', 'UrlController@getLimitedUrlsUsingFrom');
 
-Route::get('/{shortUrl}', 'UrlController@redirect');
+ Route::get('/{shortUrl}', 'UrlController@redirect');
+
+ Route::get('/check', function(Request $request){
+ 	echo  $_COOKIE["name"];
+ 	return ;
+ });
+ Route::get('/demo', function(Request $request){
+
+ 	echo setcookie('name', 'value', time() + 10 * 365 * 24 * 3600, "/");
+ 	setcookie('namasde', 'value', 0, "/");
+ 	return;
+ 	//$request->session()->set('token','value of session');
+ 	//return response('Cookie set!')->withCookie(cookie('name', 'my value', 60),Cookie::make('nasdddddddamfghe', 'asdasdasdmy value', 1260));
+ 	// try {
+ 	//
+ 	// // Generate a version 1 (time-based) UUID object
+ 	// $uuid1 = Uuid::uuid1();
+ 	// echo $uuid1; // i.e. e4eaaaf2-d142-11e1-b3e4-080027620cdd
+ 	// } catch (UnsatisfiedDependencyException $e) {
+ 	//
+ 	// // Some dependency was not met. Either the method cannot be called on a
+ 	// // 32-bit system, or it can, but it relies on Moontoast\Math to be present.
+ 	// echo 'Caught exception: ' . $e->getMessage() . "\n";
+ 	//
+ 	// }
+
+
+ });
 
 /*
  * |--------------------------------------------------------------------------

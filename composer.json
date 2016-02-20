@@ -8,7 +8,8 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.2.*",
         "jenssegers/agent": "^2.3",
-        "hashids/hashids": "^1.0"
+        "hashids/hashids": "^1.0",
+        "ramsey/uuid": "^3.2"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

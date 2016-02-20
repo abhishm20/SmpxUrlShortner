@@ -20,6 +20,8 @@ class CreateHitsTable extends Migration
             $table->timestamp('updated_at');
             $table->string('browser');
             $table->string('language');
+            $table->string('cookie_id');
+            $table->string('session_id');
             $table->string('client_ip');
             $table->integer('url_id');
             $table->index('url_id');

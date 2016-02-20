@@ -16,8 +16,6 @@ class CreateUrlsTable extends Migration
             $table->increments('id');
             $table->string('short_url');
             $table->string('long_url');
-            $table->string('cookie_id');
-            $table->string('session_id');
             $table->timestamp('created_at');
             $table->timestamp('updated_at');
             $table->boolean('is_active');

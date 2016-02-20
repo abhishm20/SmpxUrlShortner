@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 var aaData = [];
 var from = 1;
@@ -42,15 +42,17 @@ function setData(data){
 
 function postUrl(){
 	var long_url = $('#short_url_form').find('input[name="longUrl"]').val();
+	var cotegory = $('#short_url_form').find('input[name="cotegory"]').val();
+	var customKey = $('#short_url_form').find('input[name="customKey"]').val();
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:8000/urls",
-		data: {long_url: long_url},
+		data: {long_url: long_url, cotegory: cotegory, customKey: customKey},
 		success: function(msg) {
 			addData(msg);
 		},
 		error: function(err){
-			alert(JSON.stringify(err));
+			console.log(JSON.stringify(err));
 		}
 	});
 	return false;
@@ -64,13 +66,13 @@ function addData(data){
 					"<a target='_blank' href="+data.long_url+">"+data.long_url+"</a>",
 					"<a target='_blank' href="+data.short_url+">"+data.short_url+"</a>",
 					data.created_at,
-					"<button type='button' onclick='return deleteUrl("+data[i].id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
+					"<button type='button' onclick='return deleteUrl("+data.id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
 					data.clicks
 			];
 		table.fnAddData(res);
 	}
 	else{
-		alert('No data found');
+		console.log('No data found');
 	}
 }
 
@@ -85,4 +87,3 @@ function ready(){
 	});
 }
 ready();
-
