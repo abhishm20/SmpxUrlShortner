@@ -1,70 +1,24 @@
 //clicks graph options
-var clickChart = new CanvasJS.Chart("clicks",
-{
-    title:{
-        text: "Clicks",
-        fontSize: 25
-    },
-    animationEnabled: true,
-    axisX:{
-        gridColor: "Silver",
-        tickColor: "silver",
-        valueFormatString: "MMM"
-    },
-    toolTip:{
-        shared:true
-    },
-    theme: "theme2",
-    axisY: {
-        gridColor: "Silver",
-        tickColor: "silver"
-    },
-    legend:{
-        verticalAlign: "center",
-        horizontalAlign: "right"
-    },
-    data: [
-    {
-        type: "line",
-        showInLegend: true,
-        lineThickness: 2,
-        name: "Unique Session",
-        markerType: "square",
-        color: "#F08080",
-        dataPoints: []
-    },
-    {
-        type: "line",
-        showInLegend: true,
-        name: "Unique Clicks",
-        color: "#20B2AA",
-        lineThickness: 2,
-        dataPoints: []
-    },
-    {
-        type: "line",
-        showInLegend: true,
-        name: "Unique Users",
-        color: "#337AB7",
-        lineThickness: 2,
-        dataPoints: []
-    }
-
-
-    ],
-  legend:{
-    cursor:"pointer",
-    itemclick:function(e){
-      if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-        e.dataSeries.visible = false;
-      }
-      else{
-        e.dataSeries.visible = true;
-      }
-      chart.render();
-    }
-  }
-});
+var clicksOption = {
+    title: {
+			text: "Spline Chart using jQuery Plugin"
+		},
+                animationEnabled: true,
+		data: [
+		{
+			type: "spline", //for user
+			dataPoints: []
+		},
+          {
+			type: "spline", //for session
+			dataPoints: []
+		},
+        {
+			type: "spline", //for total
+			dataPoints: []
+		},
+		]
+};
 
 //loader options
 var opts = {
@@ -96,10 +50,9 @@ function getAnalytics(data, range){
     var resData = [];
     $.ajax({
 		type: "GET",
-		url: "http://localhost:8000/urls/"+data+"/analytics/clicks/hour",
+		url: "http://localhost:8000/urls/"+data+"/analytics/clicks/year",
 		success: function(msg) {
             resData = JSON.parse(msg);
-            console.log(msg);
             drawClickGraph(resData);
             spinner.stop();
             return;
@@ -113,17 +66,16 @@ function getAnalytics(data, range){
 }
 
 function drawClickGraph(data){
-    //console.log(JSON.stringify(clickChart.options.data[0].dataPoints));
+    console.log(JSON.stringify(data));
     count = 0;
-    for(obj in data){
-        var keys = [];
-        for(var k in obj) keys.push(k);
-        for(var i=0; i < keys.length; i++){
-            clickChart.options.data[count].dataPoints = [
-            		{ x: 'new Date(2010,1,3)', y: obj[keys[i]] }];
-                }
+    for(index in data){
+        var key = Object.keys(data[index])[0];
+        clicksOption.data[0].dataPoints.push(
+        		{ x: key, y: data[index][key] });
+
     }
-    clickChart.render();
+    alert(JSON.stringify(clicksOption.data[0].dataPoints));
+    $("#clicks").CanvasJSChart(clicksOption);
 }
 // window.onload = function () {
 		// var chart = new CanvasJS.Chart("clicks",
