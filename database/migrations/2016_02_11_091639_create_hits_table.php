@@ -23,6 +23,14 @@ class CreateHitsTable extends Migration
             $table->string('cookie_id');
             $table->string('session_id');
             $table->string('client_ip');
+            $table->string('user_agent');
+            $table->string('referrers');
+            $table->string('remote_addr');
+            $table->string('remote_port');
+            $table->string('remote_method');
+            $table->string('city');
+            $table->string('state');
+            $table->string('country');
             $table->integer('url_id');
             $table->index('url_id');
         });
