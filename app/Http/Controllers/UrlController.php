@@ -102,6 +102,9 @@ public function redirect(Request $request, $shortUrl){
 		// 32-bit system, or it can, but it relies on Moontoast\Math to be present.
 		echo 'Caught exception: ' . $e->getMessage() . "\n";
 	}
+	$httpReferrer = '';
+	if(!empty($_SERVER['HTTP_REFERER']))
+		$httpReferrer = $_SERVER['HTTP_REFERER'];
 
 	$url->clicks = $url['clicks'] +1;
 	$url->save();
@@ -114,7 +117,7 @@ public function redirect(Request $request, $shortUrl){
 		'cookie_id' => $cookieUuid1,
 		'session_id' => $sessionUuid1,
 		'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-		'referrers' => $_SERVER['HTTP_REFERER'],
+		'referrers' => $httpReferrer,
 		'remote_addr' => $_SERVER["REMOTE_ADDR"],
 		'remote_port' => $_SERVER["REMOTE_PORT"],
 		'remote_method' => $_SERVER["REQUEST_METHOD"],
@@ -159,7 +162,7 @@ public function index(Request $request){
 
 
 /**
-* Returns the url analytics data
+* Returns the url Clicks analytics data
 */
 public function clickAnalytics(Request $request, $id, $range){
 	$url = Url::find($id);
@@ -174,34 +177,149 @@ public function clickAnalytics(Request $request, $id, $range){
 		}else if($range == 'month'){
 			$GLOBALS['filter'] = 'M';
 		}else if($range == 'week'){
-			$GLOBALS['filter'] = 'W';
+			$GLOBALS['filter'] = 'w';
 		}else if($range == 'year'){
 			$GLOBALS['filter'] = 'Y';
 		}else if($range == 'hour'){
 			$GLOBALS['filter'] = 'h';
+		}else if($range == 'minute'){
+			$GLOBALS['filter'] = 'i';
+		}else if($range == 'second'){
+			$GLOBALS['filter'] = 's';
 		}else{
 			$GLOBALS['filter'] = 'M';
 		}
 	}
 
-	$clickData = $url->hits()->select(\DB::raw('created_at, session_id'))->get()
+	$clickSessionData = $url->hits()->select(\DB::raw('created_at, session_id'))->get()
 	 ->groupBy(function($date) {
         return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
-	$clickResult = array();
-	foreach ($clickData as $key => $value) {
-		$incr = 0;
-		$prevValueValue = '';
+
+	$clickUserData = $url->hits()->select(\DB::raw('created_at, cookie_id'))->get()
+	 ->groupBy(function($date) {
+        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+	});
+
+	$clickTotalData = $url->hits()->select(\DB::raw('created_at'))->get()
+	 ->groupBy(function($date) {
+        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+	});
+	$clickResult = array(array());
+	$clickSessionResult = array();
+	$clickUserResult = array();
+	$clickTotalResult = array();
+	foreach ($clickSessionData as $key => $value) {
+		$distinctArray = array();
 		foreach ($value as $valueKey => $valueValue) {
-			if(!empty($valueValue) and $prevValueValue !== '')
-				$incr =1;
-			else if(!empty($valueValue) and $prevValueValue !== $valueValue)
-				$incr ++;
+			$distinctArray[] = $valueValue['session_id'];
 		}
-		$obj = new \stdClass();
-		$obj->$key = $incr;
-		$clickResult[] = $obj;
+		$countElement = count(array_unique($distinctArray));
+		$clickResult[$key]['session'] = $countElement;
 	}
+
+	foreach ($clickUserData as $key => $value) {
+		$distinctArray = array();
+		foreach ($value as $valueKey => $valueValue) {
+			$distinctArray[] = $valueValue['cookie_id'];
+		}
+		$countElement = count(array_unique($distinctArray));
+		$clickResult[$key]['user'] = $countElement;
+	}
+
+	foreach ($clickTotalData as $key => $value) {
+		$distinctArray = array();
+		foreach ($value as $valueKey => $valueValue) {
+			$distinctArray[] = $valueValue['cookie_id'];
+		}
+		$countElement = count(($distinctArray));
+		$clickResult[$key]['total'] = $countElement;
+	}
+	unset($clickResult[0]);
+	echo json_encode($clickResult);
+	return;
+}
+
+/**
+* Returns the url Platform analytics data
+*/
+public function platformAnalytics(Request $request, $id, $range){
+	$url = Url::find($id);
+
+	if(empty($url)){
+		echo 'Not Found';
+		return;
+	}
+
+	$GLOBALS['filter'] = 'D';
+
+	if(!empty($range)){
+		if($range == 'day'){
+			$GLOBALS['filter'] = 'D';
+		}else if($range == 'month'){
+			$GLOBALS['filter'] = 'M';
+		}else if($range == 'week'){
+			$GLOBALS['filter'] = 'w';
+		}else if($range == 'year'){
+			$GLOBALS['filter'] = 'Y';
+		}else if($range == 'hour'){
+			$GLOBALS['filter'] = 'h';
+		}else if($range == 'minute'){
+			$GLOBALS['filter'] = 'i';
+		}else if($range == 'second'){
+			$GLOBALS['filter'] = 's';
+		}else{
+			$GLOBALS['filter'] = 'M';
+		}
+	}
+
+	$platformData = $url->hits()
+	->select(\DB::raw('count(*) as count, platform'))
+  	->groupBy('platform')
+  	->get();
+	echo json_encode($platformData);
+	return;
+
+	$clickUserData = $url->hits()->select(\DB::raw('created_at, cookie_id'))->get()
+	 ->groupBy(function($date) {
+        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+	});
+
+	$clickTotalData = $url->hits()->select(\DB::raw('created_at'))->get()
+	 ->groupBy(function($date) {
+        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+	});
+	$clickResult = array(array());
+	$clickSessionResult = array();
+	$clickUserResult = array();
+	$clickTotalResult = array();
+	foreach ($clickSessionData as $key => $value) {
+		$distinctArray = array();
+		foreach ($value as $valueKey => $valueValue) {
+			$distinctArray[] = $valueValue['session_id'];
+		}
+		$countElement = count(array_unique($distinctArray));
+		$clickResult[$key]['session'] = $countElement;
+	}
+
+	foreach ($clickUserData as $key => $value) {
+		$distinctArray = array();
+		foreach ($value as $valueKey => $valueValue) {
+			$distinctArray[] = $valueValue['cookie_id'];
+		}
+		$countElement = count(array_unique($distinctArray));
+		$clickResult[$key]['user'] = $countElement;
+	}
+
+	foreach ($clickTotalData as $key => $value) {
+		$distinctArray = array();
+		foreach ($value as $valueKey => $valueValue) {
+			$distinctArray[] = $valueValue['cookie_id'];
+		}
+		$countElement = count(($distinctArray));
+		$clickResult[$key]['total'] = $countElement;
+	}
+	unset($clickResult[0]);
 	echo json_encode($clickResult);
 	return;
 }
@@ -276,6 +394,7 @@ public function store(Request $request)
 	echo $urlInstance->toJson();
 	return;
 }
+
 
 /**
 * Display the specified resource.

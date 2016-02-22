@@ -32,7 +32,7 @@ function setData(data){
 	for (i in data) {
 		aaData.push([data[i].id,
 		             "<a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a>",
-		             "<a target='_blank' href="+data[i].short_url+">"+data[i].short_url.substr(0,25)+"</a>",
+		             "<a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a>",
 		             data[i].created_at,
 		             "<button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
 		             "<button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn delete btn-success'>"+ data[i].clicks +"</button>"]);
@@ -64,7 +64,7 @@ function addData(data){
 		var res = [
 					data.id,
 					"<a target='_blank' href="+data.long_url+">"+data.long_url.substr(0,20)+"</a>",
-					"<a target='_blank' href="+data.short_url+">"+data.short_url.substr(0,25)+"</a>",
+					"<a target='_blank' href="+data.short_url+">"+data.short_url+"</a>",
 					data.created_at,
 					"<button type='button' id="+data.id+" onclick='return deleteUrl("+data.id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
 					data.clicks
@@ -100,6 +100,8 @@ function removeData(data){
 	}
 }
 function ready(){
+	$("#clickPanel").hide();
+	$("#platformPanel").hide();
 	$.get("http://localhost:8000/urls", function(res, status){
 		var data = JSON.parse(res);
 		setData(data.data);
