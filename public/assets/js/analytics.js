@@ -114,7 +114,7 @@ function drawClickGraph(data, range){
                 clickGraph.options.data[1].dataPoints.push({label: xValue, y : data[xValue]['user']});
                 clickGraph.options.data[2].dataPoints.push({label: xValue, y : data[xValue]['session']});
             }
-            //spinner.stop();
+            spinner.stop();
             clickGraph.render();
             return;
         },
