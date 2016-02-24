@@ -1,7 +1,7 @@
 <?php
 
 return [
-	
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'url' => 'http://localhost:8000',
+    'url' => 'http://brainboxapp.com:8000',
 
     /*
     |--------------------------------------------------------------------------
@@ -155,9 +155,9 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-    	
+
     	/*
-    	 * Service provider for User-agent parser 	
+    	 * Service provider for User-agent parser
     	 */
     	Jenssegers\Agent\AgentServiceProvider::class,
 
@@ -206,7 +206,7 @@ return [
         'URL'       => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
-    		
+
     	'Agent' => 'Jenssegers\Agent\Facades\Agent',
 
     ],

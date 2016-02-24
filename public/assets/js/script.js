@@ -50,7 +50,7 @@ function postUrl(){
 	var customKey = $('#short_url_form').find('input[name="customKey"]').val();
 	$.ajax({
 		type: "POST",
-		url: "http://localhost:8000/urls",
+		url: "http://brainboxapp:8000/urls",
 		data: {long_url: long_url, cotegory: cotegory, customKey: customKey},
 		success: function(msg) {
 			addData(msg);
@@ -71,7 +71,7 @@ function addData(data){
 					"<a target='_blank' href="+data.short_url+">"+data.short_url+"</a>",
 					data.created_at,
 					"<button type='button' id="+data.id+" onclick='return deleteUrl("+data.id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
-					data.clicks
+					"<button type='button' id="+data.id+" onclick='return getAnalytics("+data.id+")' class='btn delete btn-success'>"+ data.clicks +"</button>"
 			];
 		table.fnAddData(res);
 	}
@@ -105,7 +105,7 @@ function removeData(data){
 }
 function ready(){
 	$("#analyticsPanel").hide();
-	$.get("http://localhost:8000/urls", function(res, status){
+	$.get("http://brainboxapp:8000/urls", function(res, status){
 		var data = JSON.parse(res);
 		setData(data.data);
 	});
