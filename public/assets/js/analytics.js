@@ -1,4 +1,6 @@
 //clicks graph options
+
+
 var clickGraph = new CanvasJS.Chart("clickGraph",{
     theme:"theme2",
     title:{
@@ -51,8 +53,7 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
 
     }
 });
-var platformGraph = new CanvasJS.Chart("platformGraph",
-	{
+var platformGraph = new CanvasJS.Chart("platformGraph",{
 		title:{
 			text: "Platform Analysis",
 			verticalAlign: 'top',
@@ -64,18 +65,37 @@ var platformGraph = new CanvasJS.Chart("platformGraph",
 			type: "doughnut",
 			startAngle:20,
 			toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
-			indexLabel: "{label} #percent%",
+			indexLabel: "{label}: {y}",
 			dataPoints: [
-				{  y: 67, label: "Inbox" },
-				{  y: 28, label: "Archives" },
-				{  y: 10, label: "Labels" },
-				{  y: 7,  label: "Drafts"},
-				{  y: 4,  label: "Trash"}
 			]
 		}
 		]
 	});
 
+    function cb(start, end) {
+    		$('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    		currentRangeFrom = start.format('YYYY-MM-DD hh:mm:ss');
+    		currentRangeTo = end.format('YYYY-MM-DD hh:mm:ss');
+            getAnalytics(currentUrlId);
+
+    	}
+    	cb(moment().startOf('month'), moment().endOf('month'));
+
+    	$('#reportrange').daterangepicker({
+    		timePicker: true,
+    	   timePickerIncrement: 10,
+    	   locale: {
+    		   format: 'MM/DD/YYYY h:mm A'
+    	   },
+    		ranges: {
+    		   'Today': [moment().subtract(1, 'days'), moment().endOf('day')],
+    		   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+    		   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+    		   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+    		   'This Month': [moment().startOf('month'), moment().endOf('month')],
+    		   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    		}
+    	}, cb);
 
 //loader options
 var opts = {
@@ -86,30 +106,37 @@ var referrerLoader = document.getElementById('referrerPanel');
 var platformLoader = document.getElementById('platformPanel');
 
 var currentUrlId;
+var currentUnit;
+var currentRangeFrom;
+var currentRangeTo;
 
-function getAnalytics(data, range){
+function getAnalytics(data){
     currentUrlId = data;
-
-    drawClickGraph(data, range);
-    drawPlatformGraph(data, range);
+    $("#analyticsPanel").show();
+    drawClickGraph();
+    drawPlatformGraph();
     //drawReferrerGraph(data, range);
     return false;
 }
 
-function drawClickGraph(data, range){
-    $("#clickPanel").show();
+function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);
     $.ajax({
         type: "GET",
-        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/clicks/"+range,
+        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             xValues = Object.keys(data);
             clickGraph.options.data[0].dataPoints = [];
             clickGraph.options.data[1].dataPoints = [];
             clickGraph.options.data[2].dataPoints = [];
+            $('#sessionCount').text(data['sessionCount']);
+            $('#cookieCount').text(data['cookieCount']);
+            $('#totalCount').text(data['totalCount']);
+            data = (JSON.parse(JSON.stringify(data)));
             for (xValue of xValues) {
                 types = Object.keys(data[xValue]);
+                if(xValue == 'sessionCount' || xValue == 'cookieCount' || xValue == 'totalCount') continue;
                 clickGraph.options.data[0].dataPoints.push({label: xValue, y : data[xValue]['total']});
                 clickGraph.options.data[1].dataPoints.push({label: xValue, y : data[xValue]['user']});
                 clickGraph.options.data[2].dataPoints.push({label: xValue, y : data[xValue]['session']});
@@ -126,13 +153,12 @@ function drawClickGraph(data, range){
 
 }
 
-function drawPlatformGraph(data, range){
-    $("#platformPanel").show();
+function drawPlatformGraph(){
     var spinner = new Spinner(opts).spin(platformLoader);
     platformGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/platform/"+range,
+        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (pf of data) {
@@ -151,7 +177,8 @@ function drawPlatformGraph(data, range){
 }
 
 
-function changeClicksAnalytics(range){
-    drawClickGraph(currentUrlId, range);
+function changeUnit(unit){
+    currentUnit = unit;
+    getAnalytics(currentUrlId);
     return;
 }

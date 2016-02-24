@@ -164,45 +164,56 @@ public function index(Request $request){
 /**
 * Returns the url Clicks analytics data
 */
-public function clickAnalytics(Request $request, $id, $range){
+public function clickAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
+
 	$url = Url::find($id);
 	if(empty($url)){
 		echo 'Not Found';
 		return;
 	}
 	$GLOBALS['filter'] = 'D';
-	if(!empty($range)){
-		if($range == 'day'){
-			$GLOBALS['filter'] = 'D';
-		}else if($range == 'month'){
+	if(!empty($unit)){
+		if($unit == 'date'){
+			$GLOBALS['filter'] = 'd';
+		}else if($unit == 'month'){
 			$GLOBALS['filter'] = 'M';
-		}else if($range == 'week'){
-			$GLOBALS['filter'] = 'w';
-		}else if($range == 'year'){
+		}else if($unit == 'week'){
+			$GLOBALS['filter'] = 'D';
+		}else if($unit == 'year'){
 			$GLOBALS['filter'] = 'Y';
-		}else if($range == 'hour'){
+		}else if($unit == 'hour'){
 			$GLOBALS['filter'] = 'h';
-		}else if($range == 'minute'){
+		}else if($unit == 'minute'){
 			$GLOBALS['filter'] = 'i';
-		}else if($range == 'second'){
+		}else if($unit == 'second'){
 			$GLOBALS['filter'] = 's';
 		}else{
 			$GLOBALS['filter'] = 'M';
 		}
 	}
+	$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->distinct('session_id')->count('session_id');
+	$clickCookieCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->distinct('session_id')->count('cookie_id');
+	$clickTotalCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->count('id');
 
-	$clickSessionData = $url->hits()->select(\DB::raw('created_at, session_id'))->get()
-	 ->groupBy(function($date) {
+	$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->select(\DB::raw('created_at, session_id'))->get()
+	->groupBy(function($date) {
+        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+	});
+	// echo json_encode($clickSessionData);
+	// return;
+	$clickUserData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->select(\DB::raw('created_at, cookie_id'))->get()
+	->groupBy(function($date) {
         return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
 
-	$clickUserData = $url->hits()->select(\DB::raw('created_at, cookie_id'))->get()
-	 ->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-
-	$clickTotalData = $url->hits()->select(\DB::raw('created_at'))->get()
-	 ->groupBy(function($date) {
+	$clickTotalData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->select(\DB::raw('created_at'))->get()
+	->groupBy(function($date) {
         return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
 	$clickResult = array(array());
@@ -235,6 +246,9 @@ public function clickAnalytics(Request $request, $id, $range){
 		$countElement = count(($distinctArray));
 		$clickResult[$key]['total'] = $countElement;
 	}
+	$clickResult['sessionCount'] = $clickSessionCount;
+	$clickResult['cookieCount'] = $clickCookieCount;
+	$clickResult['totalCount'] = $clickTotalCount;
 	unset($clickResult[0]);
 	echo json_encode($clickResult);
 	return;
@@ -243,7 +257,7 @@ public function clickAnalytics(Request $request, $id, $range){
 /**
 * Returns the url Platform analytics data
 */
-public function platformAnalytics(Request $request, $id, $range){
+public function platformAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
 	$url = Url::find($id);
 
 	if(empty($url)){
@@ -255,11 +269,11 @@ public function platformAnalytics(Request $request, $id, $range){
 
 	if(!empty($range)){
 		if($range == 'day'){
-			$GLOBALS['filter'] = 'D';
+			$GLOBALS['filter'] = 'd';
 		}else if($range == 'month'){
 			$GLOBALS['filter'] = 'M';
 		}else if($range == 'week'){
-			$GLOBALS['filter'] = 'w';
+			$GLOBALS['filter'] = 'D';
 		}else if($range == 'year'){
 			$GLOBALS['filter'] = 'Y';
 		}else if($range == 'hour'){
@@ -273,55 +287,13 @@ public function platformAnalytics(Request $request, $id, $range){
 		}
 	}
 
-	$platformData = $url->hits()
+	$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, platform'))
   	->groupBy('platform')
   	->get();
 	echo json_encode($platformData);
 	return;
 
-	$clickUserData = $url->hits()->select(\DB::raw('created_at, cookie_id'))->get()
-	 ->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-
-	$clickTotalData = $url->hits()->select(\DB::raw('created_at'))->get()
-	 ->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-	$clickResult = array(array());
-	$clickSessionResult = array();
-	$clickUserResult = array();
-	$clickTotalResult = array();
-	foreach ($clickSessionData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['session_id'];
-		}
-		$countElement = count(array_unique($distinctArray));
-		$clickResult[$key]['session'] = $countElement;
-	}
-
-	foreach ($clickUserData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['cookie_id'];
-		}
-		$countElement = count(array_unique($distinctArray));
-		$clickResult[$key]['user'] = $countElement;
-	}
-
-	foreach ($clickTotalData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['cookie_id'];
-		}
-		$countElement = count(($distinctArray));
-		$clickResult[$key]['total'] = $countElement;
-	}
-	unset($clickResult[0]);
-	echo json_encode($clickResult);
-	return;
 }
 
 

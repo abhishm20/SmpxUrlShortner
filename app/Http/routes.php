@@ -35,8 +35,8 @@ use Illuminate\Http\Request;
 
  Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
 
- Route::get('/urls/{id}/analytics/clicks/{range}', 'UrlController@clickAnalytics');
- Route::get('/urls/{id}/analytics/platform/{range}', 'UrlController@platformAnalytics');
+ Route::get('/urls/{id}/analytics/clicks/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@clickAnalytics');
+ Route::get('/urls/{id}/analytics/platform/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@platformAnalytics');
  Route::get('/urls/{id}/delete', 'UrlController@destroy');
 
  Route::get('/urls/from/{from}', 'UrlController@getLimitedUrlsUsingFrom');

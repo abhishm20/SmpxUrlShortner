@@ -1,9 +1,13 @@
 /**
  *
  */
+
 var aaData = [];
 var from = 1;
 var to = 10;
+
+
+
 var table = $("#dataTable").dataTable({
 	"order": [[ 3, 'desc' ]],
 	"bJQueryUI": true,
@@ -100,8 +104,7 @@ function removeData(data){
 	}
 }
 function ready(){
-	$("#clickPanel").hide();
-	$("#platformPanel").hide();
+	$("#analyticsPanel").hide();
 	$.get("http://localhost:8000/urls", function(res, status){
 		var data = JSON.parse(res);
 		setData(data.data);

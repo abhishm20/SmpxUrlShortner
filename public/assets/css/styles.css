@@ -14,3 +14,6 @@
     padding-bottom: 0px;
     padding-top: 0px;
 }
+.mycontent-left {
+  border-right: 1px dashed	 #333;
+}
