@@ -105,7 +105,7 @@ function removeData(data){
 }
 function ready(){
 	$("#analyticsPanel").hide();
-	$.get("http://brainboxapp:8000/urls", function(res, status){
+	$.get("http://brainboxapp.com:8000/urls", function(res, status){
 		var data = JSON.parse(res);
 		setData(data.data);
 	});
