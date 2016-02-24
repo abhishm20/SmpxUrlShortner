@@ -50,7 +50,7 @@ function postUrl(){
 	var customKey = $('#short_url_form').find('input[name="customKey"]').val();
 	$.ajax({
 		type: "POST",
-		url: "http://brainboxapp:8000/urls",
+		url: "http://brainboxapp.com:8000/urls",
 		data: {long_url: long_url, cotegory: cotegory, customKey: customKey},
 		success: function(msg) {
 			addData(msg);
@@ -83,7 +83,7 @@ function addData(data){
 function deleteUrl(id){
 	$.ajax({
 		type: "GET",
-		url: "http://localhost:8000/urls/"+id+"/delete",
+		url: "http://brainboxapp.com:8000/urls/"+id+"/delete",
 		success: function(msg) {
 			removeData(msg);
 		},

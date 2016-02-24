@@ -123,7 +123,7 @@ function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             xValues = Object.keys(data);
@@ -158,7 +158,7 @@ function drawPlatformGraph(){
     platformGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (pf of data) {
