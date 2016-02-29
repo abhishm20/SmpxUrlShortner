@@ -15,6 +15,29 @@ class UrlController extends Controller
 {
 
 
+	private function getUnit($unit){
+		$GLOBALS['filter'] = 'D';
+		if(!empty($unit)){
+			if($unit == 'date'){
+				$GLOBALS['filter'] = 'd';
+			}else if($unit == 'month'){
+				$GLOBALS['filter'] = 'M';
+			}else if($unit == 'week'){
+				$GLOBALS['filter'] = 'D';
+			}else if($unit == 'year'){
+				$GLOBALS['filter'] = 'Y';
+			}else if($unit == 'hour'){
+				$GLOBALS['filter'] = 'h';
+			}else if($unit == 'minute'){
+				$GLOBALS['filter'] = 'i';
+			}else if($unit == 'second'){
+				$GLOBALS['filter'] = 's';
+			}else{
+				$GLOBALS['filter'] = 'M';
+			}
+		}
+	}
+
 	/*
 	* Return Elapsed time by giving a $time
 	*/
@@ -102,7 +125,7 @@ public function redirect(Request $request, $shortUrl){
 		// 32-bit system, or it can, but it relies on Moontoast\Math to be present.
 		echo 'Caught exception: ' . $e->getMessage() . "\n";
 	}
-	$httpReferrer = '';
+	$httpReferrer = 'undefined';
 	if(!empty($_SERVER['HTTP_REFERER']))
 		$httpReferrer = $_SERVER['HTTP_REFERER'];
 
@@ -171,26 +194,8 @@ public function clickAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $uni
 		echo 'Not Found';
 		return;
 	}
-	$GLOBALS['filter'] = 'D';
-	if(!empty($unit)){
-		if($unit == 'date'){
-			$GLOBALS['filter'] = 'd';
-		}else if($unit == 'month'){
-			$GLOBALS['filter'] = 'M';
-		}else if($unit == 'week'){
-			$GLOBALS['filter'] = 'D';
-		}else if($unit == 'year'){
-			$GLOBALS['filter'] = 'Y';
-		}else if($unit == 'hour'){
-			$GLOBALS['filter'] = 'h';
-		}else if($unit == 'minute'){
-			$GLOBALS['filter'] = 'i';
-		}else if($unit == 'second'){
-			$GLOBALS['filter'] = 's';
-		}else{
-			$GLOBALS['filter'] = 'M';
-		}
-	}
+	$this->getUnit($unit);
+
 	$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->distinct('session_id')->count('session_id');
 	$clickCookieCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
@@ -265,33 +270,35 @@ public function platformAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 		return;
 	}
 
-	$GLOBALS['filter'] = 'D';
-
-	if(!empty($range)){
-		if($range == 'day'){
-			$GLOBALS['filter'] = 'd';
-		}else if($range == 'month'){
-			$GLOBALS['filter'] = 'M';
-		}else if($range == 'week'){
-			$GLOBALS['filter'] = 'D';
-		}else if($range == 'year'){
-			$GLOBALS['filter'] = 'Y';
-		}else if($range == 'hour'){
-			$GLOBALS['filter'] = 'h';
-		}else if($range == 'minute'){
-			$GLOBALS['filter'] = 'i';
-		}else if($range == 'second'){
-			$GLOBALS['filter'] = 's';
-		}else{
-			$GLOBALS['filter'] = 'M';
-		}
-	}
+	$this->getUnit($unit);
 
 	$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, platform'))
   	->groupBy('platform')
   	->get();
 	echo json_encode($platformData);
+	return;
+
+}
+
+/**
+* Returns the url Referrer analytics data
+*/
+public function referrerAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
+	$url = Url::find($id);
+
+	if(empty($url)){
+		echo 'Not Found';
+		return;
+	}
+
+	$this->getUnit($unit);
+
+	$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->select(\DB::raw('count(*) as count, referrers'))
+  	->groupBy('referrers')
+  	->get();
+	echo json_encode($referrerData);
 	return;
 
 }

@@ -15,7 +15,7 @@
 	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
 	<link href="{{ asset('assets/css/styles.css')}}" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+	<link href="{{ asset('assets/css/daterangepicker.css')}}" rel="stylesheet">
 </head>
 <body>
 	<div class="container-fluid">
@@ -43,7 +43,7 @@
 								<button id="submit" type="submit" class="btn center	btn-success  btn-default">Submit</button>
 							</div>
 						</form>
-						<table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+						<table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="10%">
 
 						</table>
 					</div>

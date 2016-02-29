@@ -54,48 +54,67 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
     }
 });
 var platformGraph = new CanvasJS.Chart("platformGraph",{
-		title:{
-			text: "Platform Analysis",
-			verticalAlign: 'top',
-			horizontalAlign: 'left'
-		},
-        animationEnabled: true,
-		data: [
-		{
-			type: "doughnut",
-			startAngle:20,
-			toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
-			indexLabel: "{label}: {y}",
-			dataPoints: [
-			]
-		}
-		]
-	});
+    title:{
+        text: "Platform Analysis",
+        verticalAlign: 'top',
+        horizontalAlign: 'left'
+    },
+    animationEnabled: true,
+    data: [
+        {
+            type: "doughnut",
+            startAngle:20,
+            toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
+            indexLabel: "{label}: {y}",
+            dataPoints: [
+            ]
+        }
+    ]
+});
 
-    function cb(start, end) {
-    		$('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-    		currentRangeFrom = start.format('YYYY-MM-DD hh:mm:ss');
-    		currentRangeTo = end.format('YYYY-MM-DD hh:mm:ss');
-            getAnalytics(currentUrlId);
+var referrerGraph = new CanvasJS.Chart("referrerGraph",{
+    title:{
+        text: "Referrer Analysis",
+        verticalAlign: 'top',
+        horizontalAlign: 'left'
+    },
+    animationEnabled: true,
+    data: [
+        {
+            type: "doughnut",
+            startAngle:20,
+            toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
+            indexLabel: "{label}: {y}",
+            dataPoints: [
+            ]
+        }
+    ]
+});
 
-    	}
-    	cb(moment().startOf('month'), moment().endOf('month'));
+function cb(start, end) {
+    $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+    currentRangeFrom = start.format('YYYY-MM-DD hh:mm:ss');
+    currentRangeTo = end.format('YYYY-MM-DD hh:mm:ss');
+    getAnalytics(currentUrlId);
 
-    	$('#reportrange').daterangepicker({
-    		timePicker: true,
-    	   timePickerIncrement: 10,
-    	   locale: {
-    		   format: 'MM/DD/YYYY h:mm A'
-    	   },
-    		ranges: {
-    		   'Today': [moment().subtract(1, 'days'), moment().endOf('day')],
-    		   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-    		   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-    		   'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-    		   'This Month': [moment().startOf('month'), moment().endOf('month')],
-    		   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-    		}
-    	}, cb);
+}
+cb(moment().startOf('month'), moment().endOf('month'));
+
+$('#reportrange').daterangepicker({
+    timePicker: true,
+    timePickerIncrement: 10,
+    locale: {
+        format: 'MM/DD/YYYY h:mm A'
+    },
+    ranges: {
+        'Today': [moment().subtract(1, 'days'), moment().endOf('day')],
+        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    }
+}, cb);
 
 //loader options
 var opts = {
@@ -115,6 +134,7 @@ function getAnalytics(data){
     $("#analyticsPanel").show();
     drawClickGraph();
     drawPlatformGraph();
+    drawReferrerGraph();
     //drawReferrerGraph(data, range);
     return false;
 }
@@ -123,7 +143,7 @@ function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             xValues = Object.keys(data);
@@ -158,7 +178,7 @@ function drawPlatformGraph(){
     platformGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (pf of data) {
@@ -166,6 +186,29 @@ function drawPlatformGraph(){
             }
             spinner.stop();
             platformGraph.render();
+            return;
+        },
+        error: function(err){
+            console.log(JSON.stringify(err));
+            spinner.stop();
+        }
+    });
+
+}
+
+function drawReferrerGraph(){
+    var spinner = new Spinner(opts).spin(referrerLoader);
+    referrerGraph.options.data[0].dataPoints = [];
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/referrer/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        success: function(msg) {
+            data = JSON.parse(msg);
+            for (referrer of data) {
+                referrerGraph.options.data[0].dataPoints.push({label: referrer['referrers'], y : referrer['count']});
+            }
+            spinner.stop();
+            referrerGraph.render();
             return;
         },
         error: function(err){
