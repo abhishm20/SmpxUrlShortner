@@ -17,3 +17,6 @@
 .mycontent-left {
   border-right: 1px dashed	 #333;
 }
+div.container {
+        width: 80%;
+    }

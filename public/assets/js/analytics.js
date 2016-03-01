@@ -7,11 +7,7 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
         text: "Click Analysis"
     },
     animationEnabled: true,
-    axisY :{
-        includeZero: false,
-        valueFormatString: "#,,.",
-        suffix: " mn"
-    },
+
     toolTip: {
         shared: "true"
     },
@@ -98,7 +94,7 @@ function cb(start, end) {
     getAnalytics(currentUrlId);
 
 }
-cb(moment().startOf('month'), moment().endOf('month'));
+cb(moment().subtract(1, 'days'), moment().endOf('day'));
 
 $('#reportrange').daterangepicker({
     timePicker: true,
@@ -143,7 +139,7 @@ function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);
     $.ajax({
         type: "GET",
-        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             xValues = Object.keys(data);
@@ -178,7 +174,7 @@ function drawPlatformGraph(){
     platformGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (pf of data) {
@@ -201,7 +197,7 @@ function drawReferrerGraph(){
     referrerGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://localhost:8000/urls/"+currentUrlId+"/analytics/referrer/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/referrer/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (referrer of data) {

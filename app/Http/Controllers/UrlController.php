@@ -11,6 +11,8 @@ use PhpParser\Node\Expr\Cast\Object_;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use Carbon\Carbon;
+use GeoIp2\Database\Reader;
+use GeoIp2\Exception\AddressNotFoundException;
 class UrlController extends Controller
 {
 
@@ -54,12 +56,58 @@ class UrlController extends Controller
 		60 => 'minute',
 		1 => 'second'
 	);
-
-	foreach ($tokens as $unit => $text) {
+	foreach ($tokens as $unit => $text){
 		if ($time < $unit) continue;
 		$numberOfUnits = floor($time / $unit);
 		return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
 	}
+}
+
+
+/*
+* Return urls from a specific category
+*/
+public function getCotegoryUrls($name){
+	if(!$name){
+		echo "Invalid Name";
+		return;
+	}
+	$urls = Url::where('category', $name)->get();
+	echo $urls->toJson();
+}
+
+/*
+* Return urls from a specific category
+*/
+public function getDeleted(){
+
+	$urls = Url::onlyTrashed()->get();
+	echo $urls->toJson();
+}
+
+/*
+* Return city of an ip
+*/
+public function getCity($ip){
+	$reader = new Reader(config('app.ipdb'));
+	$record = $reader->city($ip);
+	return $record->city->name;
+}
+/*
+* Return state of an ip
+*/
+public function getState($ip){
+	$reader = new Reader(config('app.ipdb'));
+	$record = $reader->city($ip);
+	return $record->mostSpecificSubdivision->name;
+}
+/*
+* Return country of an ip
+*/
+public function getCountry($ip){
+	$reader = new Reader(config('app.ipdb'));
+	$record = $reader->city($ip);
+	return $record->country->name;
 }
 
 /*
@@ -86,6 +134,15 @@ public function getLimitedUrlsUsingFrom($from){
 	$limit = $count - $from; // the limit
 	$urls = Url::skip($from)->take($limit)->get();
 	echo $urls->toJson();
+}
+
+/*
+* Return Cotegory of all urls
+*/
+public function getCategories(){
+	$urls = Url::select('category')->groupBy('category')->get();
+	echo $urls->toJson();
+	return;
 }
 
 
@@ -127,7 +184,17 @@ public function redirect(Request $request, $shortUrl){
 	}
 	$httpReferrer = 'undefined';
 	if(!empty($_SERVER['HTTP_REFERER']))
-		$httpReferrer = $_SERVER['HTTP_REFERER'];
+	$httpReferrer = $_SERVER['HTTP_REFERER'];
+
+	try{
+		$city = $this->getCity($_SERVER["REMOTE_ADDR"]);
+		$state = $this->getState($_SERVER["REMOTE_ADDR"]);
+		$country = $this->getCountry($_SERVER["REMOTE_ADDR"]);
+	}catch(AddressNotFoundException $e){
+		$city = '';
+		$state = '';
+		$country = '';
+	}
 
 	$url->clicks = $url['clicks'] +1;
 	$url->save();
@@ -144,6 +211,9 @@ public function redirect(Request $request, $shortUrl){
 		'remote_addr' => $_SERVER["REMOTE_ADDR"],
 		'remote_port' => $_SERVER["REMOTE_PORT"],
 		'remote_method' => $_SERVER["REQUEST_METHOD"],
+		'city' => $city,
+		'state' => $state,
+		'country' => $country,
 	]);
 
 	$shortQuery = $request->all();
@@ -206,20 +276,20 @@ public function clickAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $uni
 	$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('created_at, session_id'))->get()
 	->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
 	// echo json_encode($clickSessionData);
 	// return;
 	$clickUserData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('created_at, cookie_id'))->get()
 	->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
 
 	$clickTotalData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('created_at'))->get()
 	->groupBy(function($date) {
-        return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 	});
 	$clickResult = array(array());
 	$clickSessionResult = array();
@@ -274,8 +344,8 @@ public function platformAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 
 	$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, platform'))
-  	->groupBy('platform')
-  	->get();
+	->groupBy('platform')
+	->get();
 	echo json_encode($platformData);
 	return;
 
@@ -296,8 +366,8 @@ public function referrerAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 
 	$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, referrers'))
-  	->groupBy('referrers')
-  	->get();
+	->groupBy('referrers')
+	->get();
 	echo json_encode($referrerData);
 	return;
 
@@ -367,7 +437,7 @@ public function store(Request $request)
 		'short_url' => config('app.url'). '/' . $hashed_url,
 		'is_active' => true,
 		'clicks' => 0,
-		'cotegory' => $request["cotegory"]
+		'category' => $request["category"]
 	);
 	$urlInstance = Url::create($array);
 	echo $urlInstance->toJson();

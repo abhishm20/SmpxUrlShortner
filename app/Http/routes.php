@@ -28,10 +28,15 @@ use Illuminate\Http\Request;
  	$hashids = new Hashids('smpx', 6);
  	echo $hashids->encode($count);
  });
+Route::get('/urls/city/{ip}', 'UrlController@getState');
+Route::get('/urls/categories', 'UrlController@getCategories');
+Route::get('/urls/deleted', 'UrlController@getDeleted');
+Route::get('/urls/category/{name}', 'UrlController@getCotegoryUrls');
 
  Route::resource ( '/urls', 'UrlController', ['only' => [
     'index', 'show', 'create', 'store', 'edit', 'update']]
  );
+
 
  Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
 

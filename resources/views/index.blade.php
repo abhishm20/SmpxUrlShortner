@@ -24,28 +24,62 @@
 				<div class="panel panel-default">
 					<div class="panel-heading text-center main-panel-header">Smartprix Url Shortening</div>
 					<div class="panel-body">
-						<form id="short_url_form" onsubmit="return postUrl()" name="short_url_form">
-							<div class="form-group">
-								<div class="input-group">
-									<span class="input-group-addon" id="basic-addon1">Long Url</span>
-									<input id="longUrl" name="longUrl" type="text" class="form-control" placeholder="Long Url" aria-describedby="basic-addon1">
+						<div>
+							<form id="short_url_form" onsubmit="return postUrl()" name="short_url_form">
+								<div class="form-group">
+									<div class="input-group">
+										<span class="input-group-addon" id="basic-addon1">Long Url</span>
+										<input id="longUrl" name="longUrl" type="text" class="form-control" placeholder="Long Url" aria-describedby="basic-addon1">
+									</div>
 								</div>
-							</div>
-							<div class="form-group">
-								<div class="input-group">
-									<span class="input-group-addon" id="basic-addon1">Cotegory</span>
-									<input style="margin-right: -70px;" id="cotegory" name="cotegory" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
-									<span class="input-group-addon" id="basic-addon1">Custom Key</span>
-									<input id="customKey" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
-								</div>
-							</div>
-							<div class="form-group text-right">
-								<button id="submit" type="submit" class="btn center	btn-success  btn-default">Submit</button>
-							</div>
-						</form>
-						<table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="10%">
+								<div class="form-group">
+									<div class="input-group">
+										<div class="input-group-btn">
+											<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category <span class="caret"></span></button>
+											<ul id="categoryIn" class="dropdown-menu">
+												<li><a onClick="categoryInClick()" href="#">Default</a></li>
+												<li role="separator" class="divider"></li>
+											</ul>
+										</div>
+										<input type="text" id="categoryInput" name="category" class="form-control" aria-label="..." placeholder="Default: None">
+										<span class="input-group-addon" id="basic-addon1">Custom Key</span>
+										<input id="customKey" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
+									</div>
 
-						</table>
+								</div>
+								<div class="form-group text-right">
+									<button id="submit" type="submit" class="btn center	btn-success  btn-default">Submit</button>
+								</div>
+							</form>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-md-3">
+								<div class="dropdown">
+									<button class="btn btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										Category : Default
+										<span class="caret"></span>
+									</button>
+									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
+										<li><a onClick="categoryOutClick()" href="#">Default</a></li>
+										<li role="separator" class="divider"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="checkbox">
+									<label>
+										<input id="showDeleted" type="checkbox"> Show Deleted
+									</label>
+								</div>
+							</div>
+						</div>
+						<hr>
+						<div>
+							<table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="10%">
+
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -20,7 +20,7 @@ class CreateUrlsTable extends Migration
             $table->timestamp('updated_at');
             $table->boolean('is_active');
             $table->bigInteger('clicks');
-            $table->string('cotegory');
+            $table->string('category');
             $table->softDeletes();
         });
     }

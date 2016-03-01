@@ -10,7 +10,8 @@
         "jenssegers/agent": "^2.3",
         "hashids/hashids": "^1.0",
         "ramsey/uuid": "^3.2",
-        "nesbot/carbon": "^1.21"
+        "nesbot/carbon": "^1.21",
+        "geoip2/geoip2": "~2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
