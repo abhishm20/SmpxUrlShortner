@@ -102,7 +102,16 @@ public function getState($ip){
 	return $record->mostSpecificSubdivision->name;
 }
 /*
-* Return country of an ip
+* Return country iso code of an ip
+*/
+public function getCountryIsoCode($ip){
+	$reader = new Reader(config('app.ipdb'));
+	$record = $reader->city($ip);
+	return $record->country->isoCode;
+}
+
+/*
+* Return country name of an ip
 */
 public function getCountry($ip){
 	$reader = new Reader(config('app.ipdb'));
@@ -190,6 +199,7 @@ public function redirect(Request $request, $shortUrl){
 		$city = $this->getCity($_SERVER["REMOTE_ADDR"]);
 		$state = $this->getState($_SERVER["REMOTE_ADDR"]);
 		$country = $this->getCountry($_SERVER["REMOTE_ADDR"]);
+		$countryIsoCode = $this->getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
 	}catch(AddressNotFoundException $e){
 		$city = '';
 		$state = '';
@@ -214,6 +224,7 @@ public function redirect(Request $request, $shortUrl){
 		'city' => $city,
 		'state' => $state,
 		'country' => $country,
+		'country_iso_code' => $countryIsoCode
 	]);
 
 	$shortQuery = $request->all();

@@ -1,5 +1,20 @@
 //clicks graph options
-
+var sample_data = {"af":"16.63","in":"12"};
+var countryGraph = {
+    map: 'world_en',
+    backgroundColor: '#fff',
+    color: '#d6d6d6',
+    hoverOpacity: 0.7,
+    selectedColor: '#d6d6d6',
+    enableZoom: true,
+    showTooltip: true,
+    scaleColors: ['#C8EEFF', '#006491'],
+    values: sample_data,
+    normalizeFunction: 'polynomial',
+    onLabelShow: function(event, label, code) {
+                        label[0].innerHTML = label[0].innerHTML + " - The state where I live!!";
+                }
+};
 
 var clickGraph = new CanvasJS.Chart("clickGraph",{
     theme:"theme2",
@@ -119,6 +134,7 @@ var opts = {
 var clickLoader = document.getElementById('clickPanel');
 var referrerLoader = document.getElementById('referrerPanel');
 var platformLoader = document.getElementById('platformPanel');
+var countryLoader = document.getElementById('countryPanel');
 
 var currentUrlId;
 var currentUnit;
@@ -131,15 +147,49 @@ function getAnalytics(data){
     drawClickGraph();
     drawPlatformGraph();
     drawReferrerGraph();
+    drawCountryGraph();
     //drawReferrerGraph(data, range);
     return false;
 }
 
+function drawCountryGraph(){
+    var spinner = new Spinner(opts).spin(countryLoader);
+    $('#countryGraph').vectorMap(countryGraph);
+    // $.ajax({
+    //     type: "GET",
+    //     url: "urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+    //     success: function(msg) {
+    //         data = JSON.parse(msg);
+    //         xValues = Object.keys(data);
+    //         clickGraph.options.data[0].dataPoints = [];
+    //         clickGraph.options.data[1].dataPoints = [];
+    //         clickGraph.options.data[2].dataPoints = [];
+    //         $('#sessionCount').text(data['sessionCount']);
+    //         $('#cookieCount').text(data['cookieCount']);
+    //         $('#totalCount').text(data['totalCount']);
+    //         data = (JSON.parse(JSON.stringify(data)));
+    //         for (xValue of xValues) {
+    //             types = Object.keys(data[xValue]);
+    //             if(xValue == 'sessionCount' || xValue == 'cookieCount' || xValue == 'totalCount') continue;
+    //             clickGraph.options.data[0].dataPoints.push({label: xValue, y : data[xValue]['total']});
+    //             clickGraph.options.data[1].dataPoints.push({label: xValue, y : data[xValue]['user']});
+    //             clickGraph.options.data[2].dataPoints.push({label: xValue, y : data[xValue]['session']});
+    //         }
+    //         spinner.stop();
+    //         clickGraph.render();
+    //         return;
+    //     },
+    //     error: function(err){
+    //         console.log(JSON.stringify(err));
+    //         spinner.stop();
+    //     }
+    // });
+}
 function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             xValues = Object.keys(data);
@@ -166,7 +216,6 @@ function drawClickGraph(){
             spinner.stop();
         }
     });
-
 }
 
 function drawPlatformGraph(){
@@ -174,7 +223,7 @@ function drawPlatformGraph(){
     platformGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "urls/"+currentUrlId+"/analytics/platform/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (pf of data) {
@@ -197,7 +246,7 @@ function drawReferrerGraph(){
     referrerGraph.options.data[0].dataPoints = [];
     $.ajax({
         type: "GET",
-        url: "http://brainboxapp.com:8000/urls/"+currentUrlId+"/analytics/referrer/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        url: "urls/"+currentUrlId+"/analytics/referrer/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
         success: function(msg) {
             data = JSON.parse(msg);
             for (referrer of data) {

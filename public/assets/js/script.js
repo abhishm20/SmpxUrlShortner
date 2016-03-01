@@ -37,12 +37,12 @@ var table = $("#dataTable").dataTable({
 
 function getUrls(){
 	if(currentCategory){
-		$.get("http://brainboxapp.com:8000/urls/category/"+currentCategory, function(res, status){
+		$.get("urls/category/"+currentCategory, function(res, status){
 			var data = JSON.parse(res);
 			setData(data);
 		});
 	}else{
-		$.get("http://brainboxapp.com:8000/urls", function(res, status){
+		$.get("urls", function(res, status){
 			var data = JSON.parse(res);
 			setData(data.data);
 		});
@@ -70,7 +70,7 @@ function postUrl(){
 	var customKey = $('#short_url_form').find('input[name="customKey"]').val();
 	$.ajax({
 		type: "POST",
-		url: "http://brainboxapp.com:8000/urls",
+		url: "urls",
 		data: {long_url: long_url, category: category, customKey: customKey},
 		success: function(msg) {
 			addData(msg);
@@ -105,7 +105,7 @@ function addData(data){
 function deleteUrl(id){
 	$.ajax({
 		type: "GET",
-		url: "http://brainboxapp.com:8000/urls/"+id+"/delete",
+		url: "urls/"+id+"/delete",
 		success: function(msg) {
 			removeData(msg);
 		},
@@ -145,7 +145,7 @@ function categoryOutClick(a){
 
 $('#showDeleted').change(function() {
         if($(this).is(":checked")) {
-			$.get("http://brainboxapp.com:8000/urls/deleted", function(res, status){
+			$.get("urls/deleted", function(res, status){
 				var data = JSON.parse(res);
 				setData(data);
 			});
@@ -164,7 +164,7 @@ function appendCategory(category){
 	}
 };
 function setCategory(){
-	$.get("http://brainboxapp.com:8000/urls/categories", function(res, status){
+	$.get("urls/categories", function(res, status){
 		var data = JSON.parse(res);
 		for(i in data){
 			appendCategory(data[i]['category']);

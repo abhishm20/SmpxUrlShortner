@@ -31,6 +31,7 @@ class CreateHitsTable extends Migration
             $table->string('city');
             $table->string('state');
             $table->string('country');
+            $table->string('country_iso_code');
             $table->integer('url_id');
             $table->index('url_id');
         });

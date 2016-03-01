@@ -11,6 +11,7 @@
 
 	<link href="{{ asset('assets/css/dataTables.bootstrap.min.css')}}" rel="stylesheet">
 	<link href="{{ asset('assets/css/morris.css')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/jqvmap.css')}}" rel="stylesheet">
 	<!--[if lt IE 9]>
 	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
@@ -121,7 +122,6 @@
 							</div>
 						</div>
 						<hr>
-						<div>
 							<div class="row">
 								<div class="col-md-6 mycontent-left" id="platformPanel">
 									<div id="platformGraph" style="height: 300px; width: 100%;"></div>
@@ -130,7 +130,14 @@
 									<div id="referrerGraph" style="height: 300px; width: 100%;"></div>
 								</div>
 							</div>
-						</div>
+							<div class="row">
+								<div class="col-md-6 mycontent-left" id="countryPanel">
+									<div id="countryGraph" style="height: 300px; width: 100%;"></div>
+								</div>
+								<div class="col-md-6" id="referrerPanel">
+									<div id="referrerGraph" style="height: 100%; width: 100%;"></div>
+								</div>
+							</div>
 					</div>
 				</div>
 			</div>
@@ -144,11 +151,13 @@
 			<!-- spin -->
 			<script src="{{ asset('assets/js/spin.min.js')}}"></script>
 			<!-- Date Range Picker -->
-			<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-			<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+			<script type="text/javascript" src="{{ asset('assets/js/moment.min.js')}}"></script>
+			<script type="text/javascript" src="{{ asset('assets/js/daterangepicker.min.js')}}"></script>
 
 			<!-- Charts -->
 			<script src="{{ asset('assets/js/canvasjs.min.js')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.min.js')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.world.js')}}"></script>
 			<!-- xustom -->
 			<script src="{{ asset('assets/js/script.js')}}"></script>
 			<script src="{{ asset('assets/js/analytics.js')}}"></script>
