@@ -9,14 +9,14 @@
 	content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link href="{{ asset('assets/css/bootstrap.min.css')}}" rel="stylesheet">
 
-	<link href="{{ asset('assets/css/dataTables.bootstrap.min.css')}}" rel="stylesheet">
-	<link href="{{ asset('assets/css/morris.css')}}" rel="stylesheet">
-	<link href="{{ asset('assets/css/jqvmap.css')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/dataTables.bootstrap.min.css?v=1342341')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/morris.css?v=1342324')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/jqvmap.css?v=1343234')}}" rel="stylesheet">
 	<!--[if lt IE 9]>
 	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
-	<link href="{{ asset('assets/css/styles.css')}}" rel="stylesheet">
-	<link href="{{ asset('assets/css/daterangepicker.css')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/styles.css?v=1344234')}}" rel="stylesheet">
+	<link href="{{ asset('assets/css/daterangepicker.css?v=1314234')}}" rel="stylesheet">
 </head>
 <body>
 	<div class="container-fluid">
@@ -143,24 +143,24 @@
 			</div>
 
 			<!-- script references -->
-			<script src="{{ asset('assets/js/jquery.min.js')}}"></script>
-			<script src="{{ asset('assets/js/bootstrap.min.js')}}"></script>
+			<script src="{{ asset('assets/js/jquery.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/bootstrap.min.js?v=134234')}}"></script>
 			<!-- datatable -->
-			<script src="{{ asset('assets/js/jquery.dataTables.min.js')}}"></script>
-			<script src="{{ asset('assets/js/dataTables.bootstrap.min.js')}}"></script>
+			<script src="{{ asset('assets/js/jquery.dataTables.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/dataTables.bootstrap.min.js?v=134234')}}"></script>
 			<!-- spin -->
 			<script src="{{ asset('assets/js/spin.min.js')}}"></script>
 			<!-- Date Range Picker -->
-			<script type="text/javascript" src="{{ asset('assets/js/moment.min.js')}}"></script>
-			<script type="text/javascript" src="{{ asset('assets/js/daterangepicker.min.js')}}"></script>
+			<script type="text/javascript" src="{{ asset('assets/js/moment.min.js?v=134234')}}"></script>
+			<script type="text/javascript" src="{{ asset('assets/js/daterangepicker.min.js?v=134234')}}"></script>
 
 			<!-- Charts -->
-			<script src="{{ asset('assets/js/canvasjs.min.js')}}"></script>
-			<script src="{{ asset('assets/js/jquery.vmap.min.js')}}"></script>
-			<script src="{{ asset('assets/js/jquery.vmap.world.js')}}"></script>
+			<script src="{{ asset('assets/js/canvasjs.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.world.js?v=134234')}}"></script>
 			<!-- xustom -->
-			<script src="{{ asset('assets/js/script.js')}}"></script>
-			<script src="{{ asset('assets/js/analytics.js')}}"></script>
+			<script src="{{ asset('assets/js/script.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/analytics.js?v=134234')}}"></script>
 
 		</body>
 		</html>
