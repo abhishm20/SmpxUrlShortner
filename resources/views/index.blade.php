@@ -143,6 +143,24 @@
 			</div>
 
 			<!-- script references -->
-			
+			<script src="{{ asset('assets/js/jquery.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/bootstrap.min.js?v=134234')}}"></script>
+			<!-- datatable -->
+			<script src="{{ asset('assets/js/jquery.dataTables.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/dataTables.bootstrap.min.js?v=134234')}}"></script>
+			<!-- spin -->
+			<script src="{{ asset('assets/js/spin.min.js')}}"></script>
+			<!-- Date Range Picker -->
+			<script type="text/javascript" src="{{ asset('assets/js/moment.min.js?v=134234')}}"></script>
+			<script type="text/javascript" src="{{ asset('assets/js/daterangepicker.min.js?v=134234')}}"></script>
+
+			<!-- Charts -->
+			<script src="{{ asset('assets/js/canvasjs.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.min.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/jquery.vmap.world.js?v=134234')}}"></script>
+			<!-- xustom -->
+			<script src="{{ asset('assets/js/script.js?v=134234')}}"></script>
+			<script src="{{ asset('assets/js/analytics.js?v=134234')}}"></script>
+
 		</body>
 		</html>
