@@ -7,7 +7,7 @@
 	<meta name="generator" content="Bootply" />
 	<meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1">
-	<link href="{{ elixir('assets/css/everything.css') }}" rel="stylesheet">
+	<link href="{{ elixir('assets/css/everything.css')}}" rel="stylesheet">
 
 </head>
 <body>
@@ -134,9 +134,6 @@
 				</div>
 			</div>
 
-
 			<script src="{{ elixir('assets/js/everything.js')}}"></script>
-
-
 		</body>
 		</html>

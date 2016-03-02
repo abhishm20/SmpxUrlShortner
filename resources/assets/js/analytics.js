@@ -147,7 +147,7 @@ function getAnalytics(data){
     drawClickGraph();
     drawPlatformGraph();
     drawReferrerGraph();
-    drawCountryGraph();
+    //drawCountryGraph();
     //drawReferrerGraph(data, range);
     return false;
 }

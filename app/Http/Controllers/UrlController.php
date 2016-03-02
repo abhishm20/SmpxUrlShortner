@@ -204,6 +204,7 @@ public function redirect(Request $request, $shortUrl){
 		$city = '';
 		$state = '';
 		$country = '';
+		$countryIsoCode = '';
 	}
 
 	$url->clicks = $url['clicks'] +1;
