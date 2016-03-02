@@ -25,20 +25,25 @@
 										<input id="longUrl" name="longUrl" type="text" class="form-control" placeholder="Long Url" aria-describedby="basic-addon1">
 									</div>
 								</div>
-								<div class="form-group">
-									<div class="input-group">
-										<div class="input-group-btn">
-											<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category <span class="caret"></span></button>
-											<ul id="categoryIn" class="dropdown-menu">
-												<li><a onClick="categoryInClick()" href="#">Default</a></li>
-												<li role="separator" class="divider"></li>
-											</ul>
+								<div class="row form-group">
+									<div class="col-md-6">
+										<div class="input-group">
+											<div class="input-group-btn">
+												<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category <span class="caret"></span></button>
+												<ul id="categoryIn" class="dropdown-menu">
+													<li><a onClick="categoryInClick()" href="#">Default</a></li>
+													<li role="separator" class="divider"></li>
+												</ul>
+											</div>
+											<input type="text" id="categoryInput" name="category" class="form-control" aria-label="..." placeholder="Default: None">
 										</div>
-										<input type="text" id="categoryInput" name="category" class="form-control" aria-label="..." placeholder="Default: None">
-										<span class="input-group-addon" id="basic-addon1">Custom Key</span>
-										<input id="customKey" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
 									</div>
-
+									<div class="col-md-6">
+										<div class="input-group">
+											<span class="input-group-addon" id="basic-addon1">Custom Key</span>
+											<input id="customKey" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
+										</div>
+									</div>
 								</div>
 								<div class="form-group text-right">
 									<button id="submit" type="submit" class="btn center	btn-success  btn-default">Submit</button>
@@ -49,7 +54,7 @@
 						<div class="row">
 							<div class="col-md-3">
 								<div class="dropdown">
-									<button class="btn btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 										Category : Default
 										<span class="caret"></span>
 									</button>
@@ -59,6 +64,28 @@
 									</ul>
 								</div>
 							</div>
+
+							<div class="col-md-3">
+								<div class="dropdown">
+									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+										Sort : created first
+										<span class="caret"></span>
+									</button>
+									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
+										<li><a onClick="categoryOutClick()" href="#">Creation increasing</a></li>
+										<li><a onClick="categoryOutClick()" href="#">Creation decreasing</a></li>
+										<li><a onClick="categoryOutClick()" href="#">Most Clicked</a></li>
+										<li><a onClick="categoryOutClick()" href="#">Less Clicked</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="input-group input-group-sm">
+									<span class="input-group-addon " id="basic-addon1"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
+									<input type="text" class="form-control" placeholder="Search" aria-describedby="basic-addon1">
+								</div>
+							</div>
+
 							<div class="col-md-3">
 								<div class="checkbox">
 									<label>
@@ -69,9 +96,25 @@
 						</div>
 						<hr>
 						<div>
-							<table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="10%">
-
+							<table id="urlTable" class="table table-bordered">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Long Url</th>
+										<th>Short Url</th>
+										<th>Created</th>
+										<th>Delete</th>
+										<th>Hits</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
 							</table>
+							<div class="pull-right">
+								<div id="pageCounter" class="btn-group" role="group" aria-label="...">
+
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -114,22 +157,22 @@
 							</div>
 						</div>
 						<hr>
-							<div class="row">
-								<div class="col-md-6 mycontent-left" id="platformPanel">
-									<div id="platformGraph" style="height: 300px; width: 100%;"></div>
-								</div>
-								<div class="col-md-6" id="referrerPanel">
-									<div id="referrerGraph" style="height: 300px; width: 100%;"></div>
-								</div>
+						<div class="row">
+							<div class="col-md-6 mycontent-left" id="platformPanel">
+								<div id="platformGraph" style="height: 300px; width: 100%;"></div>
 							</div>
-							<div class="row">
-								<div class="col-md-6 mycontent-left" id="countryPanel">
-									<div id="countryGraph" style="height: 300px; width: 100%;"></div>
-								</div>
-								<div class="col-md-6" id="referrerPanel">
-									<div id="referrerGraph" style="height: 100%; width: 100%;"></div>
-								</div>
+							<div class="col-md-6" id="referrerPanel">
+								<div id="referrerGraph" style="height: 300px; width: 100%;"></div>
 							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6 mycontent-left" id="countryPanel">
+								<div id="countryGraph" style="height: 300px; width: 100%;"></div>
+							</div>
+							<div class="col-md-6" id="referrerPanel">
+								<div id="referrerGraph" style="height: 100%; width: 100%;"></div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

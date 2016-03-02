@@ -154,36 +154,39 @@ function getAnalytics(data){
 
 function drawCountryGraph(){
     var spinner = new Spinner(opts).spin(countryLoader);
-    $('#countryGraph').vectorMap(countryGraph);
-    // $.ajax({
-    //     type: "GET",
-    //     url: "urls/"+currentUrlId+"/analytics/clicks/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
-    //     success: function(msg) {
-    //         data = JSON.parse(msg);
-    //         xValues = Object.keys(data);
-    //         clickGraph.options.data[0].dataPoints = [];
-    //         clickGraph.options.data[1].dataPoints = [];
-    //         clickGraph.options.data[2].dataPoints = [];
-    //         $('#sessionCount').text(data['sessionCount']);
-    //         $('#cookieCount').text(data['cookieCount']);
-    //         $('#totalCount').text(data['totalCount']);
-    //         data = (JSON.parse(JSON.stringify(data)));
-    //         for (xValue of xValues) {
-    //             types = Object.keys(data[xValue]);
-    //             if(xValue == 'sessionCount' || xValue == 'cookieCount' || xValue == 'totalCount') continue;
-    //             clickGraph.options.data[0].dataPoints.push({label: xValue, y : data[xValue]['total']});
-    //             clickGraph.options.data[1].dataPoints.push({label: xValue, y : data[xValue]['user']});
-    //             clickGraph.options.data[2].dataPoints.push({label: xValue, y : data[xValue]['session']});
-    //         }
-    //         spinner.stop();
-    //         clickGraph.render();
-    //         return;
-    //     },
-    //     error: function(err){
-    //         console.log(JSON.stringify(err));
-    //         spinner.stop();
-    //     }
-    // });
+    spinner.stop();
+    $.ajax({
+        type: "GET",
+        url: "urls/"+currentUrlId+"/analytics/country/"+currentRangeFrom+"/"+currentRangeTo+"/"+currentUnit,
+        success: function(msg) {
+            console.log(msg);
+            $('#countryGraph').vectorMap(countryGraph);
+
+            // data = JSON.parse(msg);
+            // xValues = Object.keys(data);
+            // clickGraph.options.data[0].dataPoints = [];
+            // clickGraph.options.data[1].dataPoints = [];
+            // clickGraph.options.data[2].dataPoints = [];
+            // $('#sessionCount').text(data['sessionCount']);
+            // $('#cookieCount').text(data['cookieCount']);
+            // $('#totalCount').text(data['totalCount']);
+            // data = (JSON.parse(JSON.stringify(data)));
+            // for (xValue of xValues) {
+            //     types = Object.keys(data[xValue]);
+            //     if(xValue == 'sessionCount' || xValue == 'cookieCount' || xValue == 'totalCount') continue;
+            //     clickGraph.options.data[0].dataPoints.push({label: xValue, y : data[xValue]['total']});
+            //     clickGraph.options.data[1].dataPoints.push({label: xValue, y : data[xValue]['user']});
+            //     clickGraph.options.data[2].dataPoints.push({label: xValue, y : data[xValue]['session']});
+            // }
+            // spinner.stop();
+            // clickGraph.render();
+            // return;
+        },
+        error: function(err){
+            console.log(JSON.stringify(err));
+            spinner.stop();
+        }
+    });
 }
 function drawClickGraph(){
     var spinner = new Spinner(opts).spin(clickLoader);

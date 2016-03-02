@@ -14,7 +14,6 @@ var elixir = require('laravel-elixir');
  elixir(function(mix) {
      mix.styles([
          "bootstrap.min.css",
-         "dataTables.bootstrap.min.css",
          "morris.css",
          "jqvmap.css",
          "styles.css",
@@ -24,8 +23,6 @@ var elixir = require('laravel-elixir');
      mix.scripts([
          "jquery.min.js",
          "bootstrap.min.js",
-         "jquery.dataTables.min.js",
-         "dataTables.bootstrap.min.js",
          "spin.min.js",
          "moment.min.js",
          "daterangepicker.min.js",

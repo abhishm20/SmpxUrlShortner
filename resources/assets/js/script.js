@@ -1,39 +1,55 @@
 /**
 *
 */
+var totalRows = 0;		// total number of rows, get set for the first when page loads
+var mid = '';		// page counter middle numbers
+var pageRange = 10;		// number of rows per page [CONSTANT]
+var totalPages = 0;		// total number of pages, get set for the first when page loads
+var currentPage = 0;	// current Page default 0
+var urlsData = [];
+var currentRow = 0;		//current row tell the last row of existing data
 
-var aaData = [];
-var from = 1;
-var to = 10;
+var urlTable = $("#urlTable");
+var rowIndex = 0
+
+
+
+var pageNumbers = 0	;
+var currentRow = 0;
+var currentFrom = 1;
+var currentTo = 10;
 var categoryIn = $("#categoryIn");
 var categoryOut = $("#categoryOut");
 var currentCategory = '';
 
-var table = $("#dataTable").dataTable({
-	"order": [[ 3, 'desc' ]],
-	"bJQueryUI": true,
-	"bAutoWidth": false ,
-	"iDisplayLength": 5,
-	"aoColumns": [{
-		"sTitle": "No.",
-		"sWidth": "1%"
-	}, {
-		"sTitle": "Long",
-		"sWidth": "10%"
-	}, {
-		"sTitle": "Short",
-		"sWidth": "10%"
-	}, {
-		"sTitle": "Created",
-		"sWidth": "10%"
-	}, {
-		"sTitle": "Delete",
-		"sWidth": "1%"
-	}, {
-		"sTitle": "Clicks",
-		"sWidth": "1%"
-	}]
-});
+function countUrls(){
+	// $.get("urls/count", function(res, status){
+	// 	totalRows = res;
+	// 	totalPages = parseInt(totalRows / pageRange) + 1; // add 1 to get right number of pages , start from 1
+	// });
+	totalRows = 15;
+	totalPages = parseInt(totalRows / pageRange) + 1;
+}
+
+function generatePageCounter(){
+	var pageCount = 0;
+	var prev = '<button type="button" onclick="return prevPage()" class="btn btn-sm btn-default">Prev</button>'
+	var next = '<button type="button" onclick="return nextPage()" class="btn btn-sm btn-default">Next</button>'
+	for(var i = 1; i<= totalPages; i++ ){
+		pageCount++;
+		mid = mid.replace("active", "") + " <button type='button' id='pageCounterButton"+pageCount+"' onclick='gotoPage("+pageCount+")' class='btn btn-sm btn-default'>"+ (pageCount) +"</button> ";
+	}
+	var final = prev+mid+next;
+	$("#pageCounter").html(final);
+}
+
+function fixVar(){
+
+	currentRow = currentRow + urlsData[currentPage].count;alert(currentRow);
+	currentPage = Math.ceil(currentRow  / pageRange);
+	$("#pageCounterButton"+currentPage).addClass("active");
+	alert(currentPage);
+}
 
 function getUrls(){
 	if(currentCategory){
@@ -42,26 +58,42 @@ function getUrls(){
 			setData(data);
 		});
 	}else{
-		$.get("urls", function(res, status){
+		$.get("urls/from/"+currentFrom+"/to/"+currentTo, function(res, status){
 			var data = JSON.parse(res);
+			urlsData.push(data);
 			setData(data.data);
+			fixVar();
 		});
 	}
 }
 
+function nextPage(){
+	currentFrom = currentRow + 1;
+	currentTo = currentFrom + pageRange - 1;
+	getUrls();
+}
+function prevPage(){
+	currentFrom = currentRow + 1;
+	currentTo = currentFrom + pageRange - 1;
+	getUrls();
+}
+function gotoPage(pageNo){
+	setData(urlsData[pageNo]);
+}
+
 function setData(data){
-	aaData = [];
-	table.fnClearTable();
+	$('#urlTable > tbody').empty();
 	for (i in data) {
-		aaData.push([data[i].id,
-			"<a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a>",
-			"<a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a>",
-			data[i].created_at,
-			"<button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
-			"<button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn delete btn-success'>"+ data[i].clicks +"</button>"
-		]);
+		var row = "<tr><th scope='row'>"+(++rowIndex)+"</th>"+
+		"<td><a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a></td>"+
+		"<td><a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a></td>"+
+		"<td>"+data[i].time+"</td>"+
+		"<td><button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
+		"<td><button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn btn-default btn-xs'>"+ data[i].clicks +" (analyse) </button></td></tr>";
+		$('#urlTable > tbody').append(row);
 	}
-	table.fnAddData(aaData);
+
+
 };
 
 function postUrl(){
@@ -144,15 +176,15 @@ function categoryOutClick(a){
 };
 
 $('#showDeleted').change(function() {
-        if($(this).is(":checked")) {
-			$.get("urls/deleted", function(res, status){
-				var data = JSON.parse(res);
-				setData(data);
-			});
-        }else{
-			getUrls();
-		}
-    });
+	if($(this).is(":checked")) {
+		$.get("urls/deleted", function(res, status){
+			var data = JSON.parse(res);
+			setData(data);
+		});
+	}else{
+		getUrls();
+	}
+});
 
 
 function appendCategory(category){
@@ -173,6 +205,8 @@ function setCategory(){
 };
 function ready(){
 	$("#analyticsPanel").hide();
+	countUrls();
+	generatePageCounter();
 	setCategory();
 	getUrls();
 };
