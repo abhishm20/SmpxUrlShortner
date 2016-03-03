@@ -18,16 +18,12 @@ var elixir = require('laravel-elixir');
          "styles.css",
          "daterangepicker.css"
      ], 'public/assets/css/everything.css');
- });
-
- elixir(function(mix) {
-    mix.scripts([
-        "jquery.min.js",
-        "bootstrap.min.js",
-        "daterangepicker.min.js",
-        "canvasjs.min.js",
-        "script.js",
-        "analytics.js"
-    ], 'public/assets/js/everything.js');
-});
+     mix.scripts([
+         "jquery.min.js",
+         "bootstrap.min.js",
+         "daterangepicker.min.js",
+         "canvasjs.min.js",
+         "script.js",
+         "analytics.js"
+     ], 'public/assets/js/everything.js');
  });
