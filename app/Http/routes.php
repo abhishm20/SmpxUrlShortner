@@ -2,7 +2,6 @@
 use Hashids\Hashids;
 use Illuminate\Http\Request;
 
-
 /*
  * |--------------------------------------------------------------------------
  * | Routes File
@@ -19,8 +18,8 @@ use Illuminate\Http\Request;
  });
 
  Route::get('/demo', function(Request $request){
-     $country=file_get_contents('http://api.hostip.info/get_html.php?ip=216.58.203.78');
-     echo $country;
+     $time = time();
+     echo Utility::getReadableTime($time);
      return;
  });
 
@@ -28,7 +27,10 @@ use Illuminate\Http\Request;
  	$hashids = new Hashids('smpx', 6);
  	echo $hashids->encode($count);
  });
+
+ Route::get('/urls/count', 'UrlController@getCount');
 Route::get('/urls/city/{ip}', 'UrlController@getState');
+Route::get('/urls/{id}/analytics/country/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@countryAnalytics');
 Route::get('/urls/categories', 'UrlController@getCategories');
 Route::get('/urls/deleted', 'UrlController@getDeleted');
 Route::get('/urls/category/{name}', 'UrlController@getCotegoryUrls');

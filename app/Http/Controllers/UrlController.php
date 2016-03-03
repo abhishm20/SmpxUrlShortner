@@ -13,56 +13,9 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use Carbon\Carbon;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
+use App\Classes\Utility;
 class UrlController extends Controller
 {
-
-
-	private function getUnit($unit){
-		$GLOBALS['filter'] = 'D';
-		if(!empty($unit)){
-			if($unit == 'date'){
-				$GLOBALS['filter'] = 'd';
-			}else if($unit == 'month'){
-				$GLOBALS['filter'] = 'M';
-			}else if($unit == 'week'){
-				$GLOBALS['filter'] = 'D';
-			}else if($unit == 'year'){
-				$GLOBALS['filter'] = 'Y';
-			}else if($unit == 'hour'){
-				$GLOBALS['filter'] = 'h';
-			}else if($unit == 'minute'){
-				$GLOBALS['filter'] = 'i';
-			}else if($unit == 'second'){
-				$GLOBALS['filter'] = 's';
-			}else{
-				$GLOBALS['filter'] = 'M';
-			}
-		}
-	}
-
-	/*
-	* Return Elapsed time by giving a $time
-	*/
-
-	private function humanTiming ($time){
-		$time = time() - $time; // to get the time since that moment
-		$time = ($time<1)? 1 : $time;
-		$tokens = array (
-		31536000 => 'year',
-		2592000 => 'month',
-		604800 => 'week',
-		86400 => 'day',
-		3600 => 'hour',
-		60 => 'minute',
-		1 => 'second'
-	);
-	foreach ($tokens as $unit => $text){
-		if ($time < $unit) continue;
-		$numberOfUnits = floor($time / $unit);
-		return $numberOfUnits.' '.$text.(($numberOfUnits>1)?'s':'');
-	}
-}
-
 
 /*
 * Return urls from a specific category
@@ -74,6 +27,15 @@ public function getCotegoryUrls($name){
 	}
 	$urls = Url::where('category', $name)->get();
 	echo $urls->toJson();
+}
+
+/*
+* Return count of URLS
+*/
+public function getCount(){
+
+	$urls = Url::count();
+	echo $urls;
 }
 
 /*
@@ -123,12 +85,16 @@ public function getCountry($ip){
 * Return limited url range $from $to
 */
 public function getLimitedUrls($from, $to){
-	if($from > $to){
-		echo "Invalid Query";
-		return;
-	}
+	
 	$urls = Url::take($to)->skip($from)->get();
-	echo $urls->toJson();
+	foreach ($urls as $key => $value) {
+		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+	}
+	$res = new \stdClass();
+	$res->count = $urls->count();
+	$res->status = "success";
+	$res->data = $urls;
+	echo json_encode($res);
 }
 
 /*
@@ -204,6 +170,7 @@ public function redirect(Request $request, $shortUrl){
 		$city = '';
 		$state = '';
 		$country = '';
+		$countryIsoCode = '';
 	}
 
 	$url->clicks = $url['clicks'] +1;
@@ -257,6 +224,7 @@ public function redirect(Request $request, $shortUrl){
 */
 public function index(Request $request){
 	$urls = Url::all();
+
 	$res = new \stdClass();
 	$res->count = $urls->count();
 	$res->status = "success";
@@ -275,7 +243,7 @@ public function clickAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $uni
 		echo 'Not Found';
 		return;
 	}
-	$this->getUnit($unit);
+	Utility::getUnit($unit);
 
 	$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->distinct('session_id')->count('session_id');
@@ -351,13 +319,33 @@ public function platformAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 		return;
 	}
 
-	$this->getUnit($unit);
+	Utility::getUnit($unit);
 
 	$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, platform'))
 	->groupBy('platform')
 	->get();
 	echo json_encode($platformData);
+	return;
+
+}
+
+/**
+* Returns the country analytics
+*/
+public function countryAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
+	$url = Url::find($id);
+
+	if(empty($url)){
+		echo 'Not Found';
+		return;
+	}
+	Utility::getUnit($unit);
+	$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+	->select(\DB::raw('count(*) as count, country_iso_code, country'))
+	->groupBy('country_iso_code')
+	->get();
+	echo json_encode($countryData);
 	return;
 
 }
@@ -373,7 +361,7 @@ public function referrerAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 		return;
 	}
 
-	$this->getUnit($unit);
+	Utility::getUnit($unit);
 
 	$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 	->select(\DB::raw('count(*) as count, referrers'))

@@ -14,6 +14,7 @@ var elixir = require('laravel-elixir');
  elixir(function(mix) {
      mix.styles([
          "bootstrap.min.css",
+<<<<<<< HEAD
          "dataTables.bootstrap.min.css",
          "morris.css",
          "jqvmap.css",
@@ -38,3 +39,25 @@ var elixir = require('laravel-elixir');
         "analytics.js"
     ], 'public/assets/js/everything.js');
 });
+=======
+         "morris.css",
+         "jqvmap.css",
+         "styles.css",
+         "daterangepicker.css",
+     ], 'public/assets/css/everything.css');
+
+     mix.scripts([
+         "jquery.min.js",
+         "bootstrap.min.js",
+         "spin.min.js",
+         "moment.min.js",
+         "daterangepicker.min.js",
+         "jquery.vmap.min.js",
+         "jquery.vmap.world.js",
+         "canvasjs.min.js",
+         "script.js",
+         "analytics.js"
+     ], 'public/assets/js/everything.js');
+     mix.version(['public/assets/js/everything.js', 'public/assets/css/everything.css']);
+ });
+>>>>>>> ded0cb8b60cd824c0d0ed83069efc7e5e34774dd
