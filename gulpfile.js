@@ -15,7 +15,7 @@ var elixir = require('laravel-elixir');
      mix.styles([
          "bootstrap.min.css",
          "jqvmap.css",
-         "styles.css"
+         "styles.css",
          "daterangepicker.css"
      ], 'public/assets/css/everything.css');
  });
