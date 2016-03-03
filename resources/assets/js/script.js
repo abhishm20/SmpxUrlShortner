@@ -61,6 +61,7 @@ function generatePageCounter(side){
 
 
 function fixVar(){
+	console.log(JSON.stringify(currentPage));
 	currentRowFrom = (pageRange * (currentPage-1))+1;
 	currentRowTo = currentRowFrom + urlsData[currentPage-1].count - 1;
 	if(prevPage > 0){
@@ -114,7 +115,7 @@ function getUrls(){
 		}else{
 			$.get("urls/from/"+currentFrom+"/to/"+currentTo, function(res, status){
 				var result = JSON.parse(res);
-				urlsData.push(result);
+				urlsData[currentPage-1] = (result);
 				var data = result.data;
 				var row = "";
 				for (i in data) {
@@ -168,7 +169,9 @@ function expandPageCounter(data){
 		currentExpansionCounter --;
 	}
 	prevPage = currentPage;
-	currentPage = currentExpansionCounter * 3;
+	currentPage = (currentExpansionCounter-1) * 3 + 1;
+	currentFrom = (currentPage - 1) * (pageRange);
+	currentTo = currentFrom + pageRange -1;
 	getUrls();
 };
 

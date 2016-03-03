@@ -21,9 +21,11 @@ var elixir = require('laravel-elixir');
      mix.scripts([
          "jquery.min.js",
          "bootstrap.min.js",
+         "moment.min.js",
          "daterangepicker.min.js",
          "canvasjs.min.js",
          "script.js",
          "analytics.js"
      ], 'public/assets/js/everything.js');
+     mix.version(['public/assets/js/everything.js', 'public/assets/css/everything.css']);
  });
