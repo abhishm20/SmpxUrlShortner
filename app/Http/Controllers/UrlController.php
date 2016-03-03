@@ -30,6 +30,15 @@ public function getCotegoryUrls($name){
 }
 
 /*
+* Return count of URLS
+*/
+public function getCount(){
+
+	$urls = Url::count();
+	echo $urls;
+}
+
+/*
 * Return urls from a specific category
 */
 public function getDeleted(){
@@ -76,10 +85,7 @@ public function getCountry($ip){
 * Return limited url range $from $to
 */
 public function getLimitedUrls($from, $to){
-	if($from > $to){
-		echo "Invalid Query";
-		return;
-	}
+	
 	$urls = Url::take($to)->skip($from)->get();
 	foreach ($urls as $key => $value) {
 		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());

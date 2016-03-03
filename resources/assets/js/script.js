@@ -2,53 +2,102 @@
 *
 */
 var totalRows = 0;		// total number of rows, get set for the first when page loads
-var mid = '';		// page counter middle numbers
-var pageRange = 10;		// number of rows per page [CONSTANT]
+var pageRange = 10;		// number of rows per page [CONSTANT], i.e, number of rows per page
 var totalPages = 0;		// total number of pages, get set for the first when page loads
-var currentPage = 0;	// current Page default 0
-var urlsData = [];
+var currentPage = 1;	// current Page default 1, start from 1
+var urlsData = [];		// 2d array of url data with per page
+var currentExpansionCounter = 1;		//currently expansion page counter
 var currentRow = 0;		//current row tell the last row of existing data
+var prevPage = 0;		//prev page for disabling active pagecounter
+var urlTable = $("#urlTable");		//table element
+var mid = '';		// page counter middle buttons
+var currentRowFrom = 0;
+var currentRowTo = 0;
 
-var urlTable = $("#urlTable");
-var rowIndex = 0
+
+var lastPageCounter = 1;
+var isFirstBlockPageCounter = 1;
+var isLastBlockPageCOunter = 0;
+var lastExpansionCounter = 0;
+var prevExpansionCounter = 0;
+
+
+var rowIndex = 0;
+
 
 
 
 var pageNumbers = 0	;
-var currentRow = 0;
-var currentFrom = 1;
+var currentFrom = 0;
 var currentTo = 10;
 var categoryIn = $("#categoryIn");
 var categoryOut = $("#categoryOut");
 var currentCategory = '';
 
-function countUrls(){
-	// $.get("urls/count", function(res, status){
-	// 	totalRows = res;
-	// 	totalPages = parseInt(totalRows / pageRange) + 1; // add 1 to get right number of pages , start from 1
-	// });
-	totalRows = 15;
-	totalPages = parseInt(totalRows / pageRange) + 1;
+function countUrlsAndGeneratePageCounter(){
+	$.get("urls/count", function(res, status){
+		totalRows = res;
+		totalPages = Math.ceil(totalRows / pageRange); // add 1 to get right number of pages , start from 1
+		generatePageCounter();
+	});
+}
+function generatePageCounter(side){
+	var pageCounter = 0;
+	var expansionCounter = 1;
+	for(var i = 1; i<= totalPages; i++ ){
+		pageCounter++;
+		if(i % 3 ==1){
+			mid = mid + "<span style='display:none;' class=' btn-group' id='expansion"+(expansionCounter++)+"' >";
+		}
+		mid = mid + " <button type='button' id='pageCounterButton"+pageCounter+"' onclick='gotoPage("+pageCounter+")' class='btn btn-sm btn-default'>"+ (pageCounter) +"</button> ";
+		if(i % 3 == 0){
+			mid = mid + "</span>";
+		}
+	}
+	lastExpansionCounter = expansionCounter - 1;
+	$("#pageCounter").append(mid);
 }
 
-function generatePageCounter(){
-	var pageCount = 0;
-	var prev = '<button type="button" onclick="return prevPage()" class="btn btn-sm btn-default">Prev</button>'
-	var next = '<button type="button" onclick="return nextPage()" class="btn btn-sm btn-default">Next</button>'
-	for(var i = 1; i<= totalPages; i++ ){
-		pageCount++;
-		mid = mid.replace("active", "") + " <button type='button' id='pageCounterButton"+pageCount+"' onclick='gotoPage("+pageCount+")' class='btn btn-sm btn-default'>"+ (pageCount) +"</button> ";
-	}
-	var final = prev+mid+next;
-	$("#pageCounter").html(final);
-}
+
 
 function fixVar(){
+	currentRowFrom = (pageRange * (currentPage-1))+1;
+	currentRowTo = currentRowFrom + urlsData[currentPage-1].count - 1;
+	if(prevPage > 0){
+		$("#pageCounterButton"+prevPage).removeClass("active");
+	}
+	if(currentPage == totalPages){
+		$("#nextButton").prop('disabled', true);
+	}else if(currentPage < totalPages){
+		$("#nextButton").prop('disabled', false);
+	}
 
-	currentRow = currentRow + urlsData[currentPage].count;alert(currentRow);
-	currentPage = Math.ceil(currentRow  / pageRange);
+	if(currentPage == 1){
+		$("#prevButton").prop('disabled', true);
+	}else if(currentPage > 1){
+		$("#prevButton").prop('disabled', false);
+	}
+	//alert("current"+prevExpansionCounter+currentExpansionCounter);
+
+	$("#expansion"+currentExpansionCounter).show();
+	if( currentExpansionCounter != prevExpansionCounter){
+		$("#expansion"+prevExpansionCounter).hide();
+	}
+
+	if(currentExpansionCounter == 1){
+		$("#backPageCounter").hide();
+	}else{
+		$("#backPageCounter").show();
+	}
+	if(currentExpansionCounter == lastExpansionCounter){
+		$("#forePageCounter").hide();
+	}else{
+		$("#forePageCounter").show();
+	}
 	$("#pageCounterButton"+currentPage).addClass("active");
-	alert(currentPage);
+	$("#pageNumber").html(currentPage+"th of "+totalPages);
+	//alert("current page : "+currentPage);
+	$("#pageLabel").html(currentRowFrom+"-"+currentRowTo+" of "+totalRows);
 }
 
 function getUrls(){
@@ -58,42 +107,69 @@ function getUrls(){
 			setData(data);
 		});
 	}else{
-		$.get("urls/from/"+currentFrom+"/to/"+currentTo, function(res, status){
-			var data = JSON.parse(res);
-			urlsData.push(data);
-			setData(data.data);
+		if($('#tablePage'+currentPage).length){
+			$("#tablePage"+prevPage).hide();
+			$("#tablePage"+currentPage).show();
 			fixVar();
-		});
+		}else{
+			$.get("urls/from/"+currentFrom+"/to/"+currentTo, function(res, status){
+				var result = JSON.parse(res);
+				urlsData.push(result);
+				var data = result.data;
+				var row = "";
+				for (i in data) {
+					row = row + "<tr id='"+data[i].id+"'><th scope='row'>"+(++rowIndex)+"</th>"+
+					"<td><a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a></td>"+
+					"<td><a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a></td>"+
+					"<td>"+data[i].time+"</td>"+
+					"<td><button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
+					"<td><button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn btn-default btn-xs'>"+ data[i].clicks +" (analyse) </button></td></tr>";
+				}
+				$("#tablePage"+prevPage).hide();
+				$('#urlTable').append("<tbody id='tablePage"+currentPage+"'>"+row+"</tbody>");
+				fixVar();
+			});
+		}
+
 	}
 }
 
-function nextPage(){
-	currentFrom = currentRow + 1;
-	currentTo = currentFrom + pageRange - 1;
+function gotoNextPage(){
+	prevPage = currentPage;
+	currentPage ++;
+	prevExpansionCounter = currentExpansionCounter;
+	currentExpansionCounter = Math.ceil(currentPage / 3);
+	currentFrom = currentRowTo;
+	currentTo = pageRange;
 	getUrls();
 }
-function prevPage(){
-	currentFrom = currentRow + 1;
-	currentTo = currentFrom + pageRange - 1;
+function gotoPrevPage(){
+	prevPage = currentPage;
+	currentPage --;
+	prevExpansionCounter = currentExpansionCounter;
+	currentExpansionCounter = Math.ceil(currentPage / 3);
 	getUrls();
 }
 function gotoPage(pageNo){
-	setData(urlsData[pageNo]);
+	prevPage = currentPage;
+	currentPage = pageNo;
+	prevExpansionCounter = currentExpansionCounter;
+	currentExpansionCounter = Math.ceil(currentPage / 3);
+	currentFrom = (pageRange * (currentPage - 1));
+	currentTo = pageRange;
+	getUrls();
 }
 
-function setData(data){
-	$('#urlTable > tbody').empty();
-	for (i in data) {
-		var row = "<tr><th scope='row'>"+(++rowIndex)+"</th>"+
-		"<td><a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a></td>"+
-		"<td><a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a></td>"+
-		"<td>"+data[i].time+"</td>"+
-		"<td><button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
-		"<td><button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn btn-default btn-xs'>"+ data[i].clicks +" (analyse) </button></td></tr>";
-		$('#urlTable > tbody').append(row);
+function expandPageCounter(data){
+	prevExpansionCounter = currentExpansionCounter;
+	if(data){
+		currentExpansionCounter ++;
+	}else{
+		currentExpansionCounter --;
 	}
-
-
+	prevPage = currentPage;
+	currentPage = currentExpansionCounter * 3;
+	getUrls();
 };
 
 function postUrl(){
@@ -135,11 +211,21 @@ function addData(data){
 };
 
 function deleteUrl(id){
+	// totalRows--;
+	// currentRowFrom
+	// totalPages = Math.ceil(totalRows / pageRange);
+	// fixVar();
 	$.ajax({
 		type: "GET",
 		url: "urls/"+id+"/delete",
-		success: function(msg) {
-			removeData(msg);
+		success: function(data) {
+			if(data){
+				$('table#urlTable tr#'+id).remove();
+				location.reload();
+			}
+			else{
+				alert('No data found');
+			}
 		},
 		error: function(err){
 			alert(err);
@@ -148,15 +234,6 @@ function deleteUrl(id){
 	return false;
 };
 
-function removeData(data){
-	if(data){
-		var nRow = $('#'+data).closest('tr');
-		table.fnDeleteRow(nRow);
-	}
-	else{
-		alert('No data found');
-	}
-};
 
 function categoryInClick(a){
 	$("#categoryInput").val(a);
@@ -185,7 +262,14 @@ $('#showDeleted').change(function() {
 		getUrls();
 	}
 });
-
+function setCategory(){
+	$.get("urls/categories", function(res, status){
+		var data = JSON.parse(res);
+		for(i in data){
+			appendCategory(data[i]['category']);
+		}
+	});
+};
 
 function appendCategory(category){
 	if(category){
@@ -195,19 +279,11 @@ function appendCategory(category){
 		categoryOut.append('<li><a onClick="categoryOutClick(\''+category+'\')" href="#"><span class="tab">Undefined</span></a></li>');
 	}
 };
-function setCategory(){
-	$.get("urls/categories", function(res, status){
-		var data = JSON.parse(res);
-		for(i in data){
-			appendCategory(data[i]['category']);
-		}
-	});
-};
+
 function ready(){
 	$("#analyticsPanel").hide();
-	countUrls();
-	generatePageCounter();
-	setCategory();
+	countUrlsAndGeneratePageCounter();		//it will get total row and generate page counter
+	setCategory();		//it will get all category and put it into in and out category
 	getUrls();
 };
 ready();

@@ -110,9 +110,20 @@
 								<tbody>
 								</tbody>
 							</table>
-							<div class="pull-right">
-								<div id="pageCounter" class="btn-group" role="group" aria-label="...">
-
+							<div class="row">
+								<div class="col-md-6">
+									<span class="pull-left btn-group" role="group" aria-label="...">
+										showing <span id="pageLabel"></span><br/>page : <span id="pageNumber"></span>
+									</span>
+								</div>
+								<div class="col-md-6">
+									<span id="" class="pull-right btn-group" role="group" aria-label="...">
+										<button type="button" id="prevButton" onclick="return gotoPrevPage()" class="btn btn-sm btn-default">Prev</button>
+										<button type='button' id="backPageCounter" onclick='expandPageCounter(0)' class='btn btn-sm btn-default'> ... </button>
+										<span id="pageCounter" style="float:left;" class=" btn-group"></span>
+										<button type='button' id="forePageCounter" onclick='expandPageCounter(1)' class='btn btn-sm btn-default'> ... </button>
+										<button type="button" id="nextButton" onclick="return gotoNextPage()" class="btn btn-sm btn-default">Next</button>
+									</span>
 								</div>
 							</div>
 						</div>

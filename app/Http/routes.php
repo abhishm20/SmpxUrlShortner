@@ -27,6 +27,8 @@ use Illuminate\Http\Request;
  	$hashids = new Hashids('smpx', 6);
  	echo $hashids->encode($count);
  });
+
+ Route::get('/urls/count', 'UrlController@getCount');
 Route::get('/urls/city/{ip}', 'UrlController@getState');
 Route::get('/urls/{id}/analytics/country/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@countryAnalytics');
 Route::get('/urls/categories', 'UrlController@getCategories');
