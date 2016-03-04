@@ -13,7 +13,7 @@
 <body>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-5">
+			<div class="col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-heading text-center main-panel-header">Smartprix Url Shortening</div>
 					<div class="panel-body">
@@ -55,11 +55,11 @@
 							<div class="col-md-3">
 								<div class="dropdown">
 									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-										Category : Default
+										Category : All
 										<span class="caret"></span>
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
-										<li><a onClick="categoryOutClick()" href="#">Default</a></li>
+										<li><a onClick="categoryOutClick('all')" href="#">All</a></li>
 										<li role="separator" class="divider"></li>
 									</ul>
 								</div>
@@ -103,11 +103,14 @@
 										<th>Long Url</th>
 										<th>Short Url</th>
 										<th>Created</th>
+										<th>Category</th>
 										<th>Delete</th>
 										<th>Hits</th>
 									</tr>
 								</thead>
-								<tbody>
+								<tbody id="categoryData">
+								</tbody>
+								<tbody id="defaultData">
 								</tbody>
 							</table>
 							<div class="row">
@@ -130,7 +133,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-7">
+			<div class="col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-heading text-center stats-panel-header">Analytics of Short Urls</div>
 					<div class="panel-body" id="analyticsPanel">

@@ -5,7 +5,7 @@ var totalRows = 0;		// total number of rows, get set for the first when page loa
 var pageRange = 10;		// number of rows per page [CONSTANT], i.e, number of rows per page
 var totalPages = 0;		// total number of pages, get set for the first when page loads
 var currentPage = 1;	// current Page default 1, start from 1
-var urlsData = [];		// 2d array of url data with per page
+var urlsData = {};		// 2d array of url data with per page
 var currentExpansionCounter = 1;		//currently expansion page counter
 var currentRow = 0;		//current row tell the last row of existing data
 var prevPage = 0;		//prev page for disabling active pagecounter
@@ -13,7 +13,6 @@ var urlTable = $("#urlTable");		//table element
 var mid = '';		// page counter middle buttons
 var currentRowFrom = 0;
 var currentRowTo = 0;
-
 
 var lastPageCounter = 1;
 var isFirstBlockPageCounter = 1;
@@ -24,27 +23,37 @@ var prevExpansionCounter = 0;
 
 var rowIndex = 0;
 
-
-
-
 var pageNumbers = 0	;
 var currentFrom = 0;
 var currentTo = 10;
 var categoryIn = $("#categoryIn");
 var categoryOut = $("#categoryOut");
-var currentCategory = '';
+var currentCategory = 'all';
+urlsData[currentCategory] = [];
 
-function countUrlsAndGeneratePageCounter(){
+
+function bootstrap(){
 	$.get("urls/count", function(res, status){
-		totalRows = res;
-		totalPages = Math.ceil(totalRows / pageRange); // add 1 to get right number of pages , start from 1
+		urlsData[currentCategory].totalRows = res;
+		urlsData[currentCategory].totalPages = Math.ceil(res / pageRange);
+		$.get("urls/categories/count", function(res, status){
+			var data = JSON.parse(res);
+			for(i in data){
+				urlsData[data[i]['category']] = {};
+				urlsData[data[i]['category']].totalRows = data[i]['count'];
+				urlsData[data[i]['category']].totalPages = Math.ceil(data[i]['count'] / pageRange);
+			}
+			getUrls();
+		});
 		generatePageCounter();
 	});
 }
+
 function generatePageCounter(side){
 	var pageCounter = 0;
 	var expansionCounter = 1;
-	for(var i = 1; i<= totalPages; i++ ){
+	alert(urlsData[currentCategory].totalPages);
+	for(var i = 1; i<= urlsData[currentCategory].totalPages; i++ ){
 		pageCounter++;
 		if(i % 3 ==1){
 			mid = mid + "<span style='display:none;' class=' btn-group' id='expansion"+(expansionCounter++)+"' >";
@@ -55,21 +64,25 @@ function generatePageCounter(side){
 		}
 	}
 	lastExpansionCounter = expansionCounter - 1;
-	$("#pageCounter").append(mid);
+	$("#pageCounter").html(mid);
 }
 
 
 
 function fixVar(){
-	console.log(JSON.stringify(currentPage));
+
 	currentRowFrom = (pageRange * (currentPage-1))+1;
-	currentRowTo = currentRowFrom + urlsData[currentPage-1].count - 1;
+	currentRowTo = currentRowFrom + urlsData[currentCategory].pages[currentPage-1].length - 1;
+	urlsData[currentCategory].pages[currentPage-1].to = currentRowTo;
+	urlsData[currentCategory].pages[currentPage-1].from = currentRowFrom;
+	renumberRows();
 	if(prevPage > 0){
 		$("#pageCounterButton"+prevPage).removeClass("active");
 	}
-	if(currentPage == totalPages){
+
+	if(currentPage == urlsData[currentCategory].totalPages){
 		$("#nextButton").prop('disabled', true);
-	}else if(currentPage < totalPages){
+	}else if(currentPage < urlsData[currentCategory].totalPages){
 		$("#nextButton").prop('disabled', false);
 	}
 
@@ -96,38 +109,30 @@ function fixVar(){
 		$("#forePageCounter").show();
 	}
 	$("#pageCounterButton"+currentPage).addClass("active");
-	$("#pageNumber").html(currentPage+"th of "+totalPages);
+	$("#pageNumber").html(currentPage+"th of "+urlsData[currentCategory].totalPages);
 	//alert("current page : "+currentPage);
-	$("#pageLabel").html(currentRowFrom+"-"+currentRowTo+" of "+totalRows);
+	$("#pageLabel").html(currentRowFrom+"-"+currentRowTo+" of "+urlsData[currentCategory].totalRows);
 }
 
 function getUrls(){
-	if(currentCategory){
-		$.get("urls/category/"+currentCategory, function(res, status){
-			var data = JSON.parse(res);
-			setData(data);
-		});
+	if(urlsData[currentCategory][currentPage-1]){
+		setData(urlsData[currentCategory][currentPage-1].data);
+		fixVar();
 	}else{
-		if($('#tablePage'+currentPage).length){
-			$("#tablePage"+prevPage).hide();
-			$("#tablePage"+currentPage).show();
-			fixVar();
+		if(currentCategory != 'all'){
+			$.get("urls/category/"+currentCategory+"/from/"+currentFrom+"/to/"+currentTo, function(res, status){
+				var result = JSON.parse(res);
+				urlsData[currentCategory].pages = [];
+				urlsData[currentCategory].pages[currentPage-1] = result;
+				setData(urlsData[currentCategory].pages[currentPage-1]);
+				fixVar();
+			});
 		}else{
 			$.get("urls/from/"+currentFrom+"/to/"+currentTo, function(res, status){
 				var result = JSON.parse(res);
-				urlsData[currentPage-1] = (result);
-				var data = result.data;
-				var row = "";
-				for (i in data) {
-					row = row + "<tr id='"+data[i].id+"'><th scope='row'>"+(++rowIndex)+"</th>"+
-					"<td><a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a></td>"+
-					"<td><a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a></td>"+
-					"<td>"+data[i].time+"</td>"+
-					"<td><button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
-					"<td><button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn btn-default btn-xs'>"+ data[i].clicks +" (analyse) </button></td></tr>";
-				}
-				$("#tablePage"+prevPage).hide();
-				$('#urlTable').append("<tbody id='tablePage"+currentPage+"'>"+row+"</tbody>");
+				urlsData[currentCategory].pages = [];
+				urlsData[currentCategory].pages[currentPage-1] = result.data;
+				setData(urlsData[currentCategory].pages[currentPage-1]);
 				fixVar();
 			});
 		}
@@ -135,6 +140,27 @@ function getUrls(){
 	}
 }
 
+function renumberRows() {
+	$('#defaultData tr').each(function(index, el){
+		$(this).children('th').first().text(function(i,t){
+			return urlsData[currentCategory].pages[currentPage-1].from + index;
+		});
+	});
+}
+
+function setData(data){
+	var row = '';
+	for (i in data) {
+		row = row + "<tr id='"+data[i].id+"'><th scope='row'>"+(++rowIndex)+"</th>"+
+		"<td><a target='_blank' href="+data[i].long_url+">"+data[i].long_url.substr(0,20)+"</a></td>"+
+		"<td><a target='_blank' href="+data[i].short_url+">"+data[i].short_url+"</a></td>"+
+		"<td>"+data[i].time+"</td>"+
+		"<td>"+data[i].category+"</td>"+
+		"<td><button type='button' id="+data[i].id+" onclick='return deleteUrl("+data[i].id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
+		"<td><button type='button' id="+data[i].id+" onclick='return getAnalytics("+data[i].id+")' class='btn btn-default btn-xs'>"+ data[i].clicks +" (analyse) </button></td></tr>";
+	}
+	$('#defaultData').html(row);
+}
 function gotoNextPage(){
 	prevPage = currentPage;
 	currentPage ++;
@@ -171,7 +197,8 @@ function expandPageCounter(data){
 	prevPage = currentPage;
 	currentPage = (currentExpansionCounter-1) * 3 + 1;
 	currentFrom = (currentPage - 1) * (pageRange);
-	currentTo = currentFrom + pageRange -1;
+	currentTo = pageRange;
+	console.log(currentFrom+" "+currentTo);
 	getUrls();
 };
 
@@ -198,15 +225,14 @@ function addData(data){
 
 	if(data){
 		data = JSON.parse(data);
-		var res = [
-			data.id,
-			"<a target='_blank' href="+data.long_url+">"+data.long_url.substr(0,20)+"</a>",
-			"<a target='_blank' href="+data.short_url+">"+data.short_url+"</a>",
-			data.created_at,
-			"<button type='button' id="+data.id+" onclick='return deleteUrl("+data.id+")' class='btn delete btn-danger'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button>",
-			"<button type='button' id="+data.id+" onclick='return getAnalytics("+data.id+")' class='btn delete btn-success'>"+ data.clicks +"</button>"
-		];
-		table.fnAddData(res);
+		row = "<tr id='"+data.id+"'><th scope='row'>"+(++rowIndex)+"</th>"+
+		"<td><a target='_blank' href="+data.long_url+">"+data.long_url.substr(0,20)+"</a></td>"+
+		"<td><a target='_blank' href="+data.short_url+">"+data.short_url+"</a></td>"+
+		"<td>"+data.time+"</td>"+
+		"<td>"+data.category+"</td>"+
+		"<td><button type='button' id="+data.id+" onclick='return deleteUrl("+data.id+")' class='btn btn-default btn-xs'>Delete</button></td>"+
+		"<td><button type='button' id="+data.id+" onclick='return getAnalytics("+data.id+")' class='btn btn-default btn-xs'>"+ data.clicks +" (analyse) </button></td></tr>";
+		$('#defaultData').prepend(row);
 	}
 	else{
 		alert('No data found');
@@ -249,10 +275,14 @@ function categoryOutClick(a){
 		currentCategory = a;
 		$("#categoryOutName").html('Category: '+ a + ' <span class="caret"></span>');
 	}else{
-		currentCategory = '';
+		currentCategory = 'default';
 		$("#categoryOutName").html('Category: Default <span class="caret"></span>');
 	}
+	currentFrom = 0;
+	currentTo = pageRange;
+	generatePageCounter();
 	getUrls();
+
 };
 
 $('#showDeleted').change(function() {
@@ -275,18 +305,18 @@ function setCategory(){
 };
 
 function appendCategory(category){
-	if(category){
+	if(category != 'no_category'){
 		categoryIn.append('<li><a onClick="categoryInClick(\''+category+'\')" href="#"><span class="tab">'+category+'</span></a></li>');
 		categoryOut.append('<li><a onClick="categoryOutClick(\''+category+'\')" href="#"><span class="tab">'+category+'</span></a></li>');
 	}else{
-		categoryOut.append('<li><a onClick="categoryOutClick(\''+category+'\')" href="#"><span class="tab">Undefined</span></a></li>');
+		categoryOut.append('<li><a onClick="categoryOutClick(\''+category+'\')" href="#"><span class="tab">No Category</span></a></li>');
 	}
 };
 
 function ready(){
 	$("#analyticsPanel").hide();
-	countUrlsAndGeneratePageCounter();		//it will get total row and generate page counter
+	bootstrap();
 	setCategory();		//it will get all category and put it into in and out category
-	getUrls();
+
 };
 ready();

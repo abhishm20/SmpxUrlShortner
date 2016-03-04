@@ -102,11 +102,13 @@ var referrerGraph = new CanvasJS.Chart("referrerGraph",{
     ]
 });
 
+var isFirstTime = 1;
 function cb(start, end) {
     $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
     currentRangeFrom = start.format('YYYY-MM-DD hh:mm:ss');
     currentRangeTo = end.format('YYYY-MM-DD hh:mm:ss');
-    getAnalytics(currentUrlId);
+    if(!isFirstTime)
+        getAnalytics(currentUrlId);
 
 }
 cb(moment().subtract(1, 'days'), moment().endOf('day'));

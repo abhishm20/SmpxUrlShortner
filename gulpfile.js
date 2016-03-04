@@ -24,6 +24,7 @@ var elixir = require('laravel-elixir');
          "moment.min.js",
          "daterangepicker.min.js",
          "canvasjs.min.js",
+         "spin.min.js",
          "script.js",
          "analytics.js"
      ], 'public/assets/js/everything.js');

@@ -28,12 +28,17 @@ use Illuminate\Http\Request;
  	echo $hashids->encode($count);
  });
 
+Route::get('/urls/category/{name}/from/{from}/to/{to}', 'UrlController@getCotegoryUrls');
+
+
  Route::get('/urls/count', 'UrlController@getCount');
 Route::get('/urls/city/{ip}', 'UrlController@getState');
 Route::get('/urls/{id}/analytics/country/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@countryAnalytics');
 Route::get('/urls/categories', 'UrlController@getCategories');
+Route::get('/urls/categories/count', 'UrlController@getCategoriesCount');
 Route::get('/urls/deleted', 'UrlController@getDeleted');
-Route::get('/urls/category/{name}', 'UrlController@getCotegoryUrls');
+Route::get('/urls/category/{name}/count', 'UrlController@getCotegoryUrlsCount');
+
 
  Route::resource ( '/urls', 'UrlController', ['only' => [
     'index', 'show', 'create', 'store', 'edit', 'update']]

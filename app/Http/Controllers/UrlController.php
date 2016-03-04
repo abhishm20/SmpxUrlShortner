@@ -20,14 +20,32 @@ class UrlController extends Controller
 /*
 * Return urls from a specific category
 */
-public function getCotegoryUrls($name){
+public function getCotegoryUrls($name, $from, $to){
 	if(!$name){
 		echo "Invalid Name";
 		return;
 	}
-	$urls = Url::where('category', $name)->get();
+	$urls = Url::where('category', $name)->take($to)->skip($from)->get();
 	echo $urls->toJson();
 }
+
+/*
+* Return all category count
+*/
+public function getCategoriesCount(){
+	$urls = Url::select(\DB::raw('count(category) as count, category'))->groupBy('category')->get()	;
+	echo $urls;
+}
+
+/*
+* Return urls count from a specific category
+*/
+public function getCotegoryUrlsCount($name){
+
+	$urls = Url::where('category', $name)->count();
+	echo $urls;
+}
+
 
 /*
 * Return count of URLS
@@ -44,6 +62,9 @@ public function getCount(){
 public function getDeleted(){
 
 	$urls = Url::onlyTrashed()->get();
+	foreach ($urls as $key => $value) {
+		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+	}
 	echo $urls->toJson();
 }
 
@@ -85,7 +106,7 @@ public function getCountry($ip){
 * Return limited url range $from $to
 */
 public function getLimitedUrls($from, $to){
-	
+
 	$urls = Url::take($to)->skip($from)->get();
 	foreach ($urls as $key => $value) {
 		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
@@ -227,6 +248,9 @@ public function index(Request $request){
 
 	$res = new \stdClass();
 	$res->count = $urls->count();
+	foreach ($urls as $key => $value) {
+		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+	}
 	$res->status = "success";
 	$res->data = $urls;
 	echo json_encode($res);
@@ -430,15 +454,22 @@ public function store(Request $request)
 	if(substr( $longUrl, 0, 7 ) !== "http://" and substr( $longUrl, 0, 8 ) !== "https://"){
 		$longUrl = 'http://' . $longUrl ;
 	}
-
+	if(!isset($request["category"]) || $request["category"] == ''){
+		$category = 'no_category';
+	}else{
+		$category = $request["category"];
+	}
 	$array = array(
 		'long_url' => $longUrl,
 		'short_url' => config('app.url'). '/' . $hashed_url,
 		'is_active' => true,
 		'clicks' => 0,
-		'category' => $request["category"]
+		'category' => $category
 	);
+
 	$urlInstance = Url::create($array);
+
+	$urlInstance['time'] = $urlInstance['created_at']->diffForHumans(Carbon::now());
 	echo $urlInstance->toJson();
 	return;
 }
