@@ -18,7 +18,7 @@
 					<div class="panel-heading text-center main-panel-header">Smartprix Url Shortening</div>
 					<div class="panel-body">
 						<div>
-							<form id="short_url_form" onsubmit="return postUrl()" name="short_url_form">
+							<form id="short_url_form" @submit.prevent="createUrl" name="short_url_form">
 								<div class="form-group">
 									<div class="input-group">
 										<span class="input-group-addon" id="basic-addon1">Long Url</span>
