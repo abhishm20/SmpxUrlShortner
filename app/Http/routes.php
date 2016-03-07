@@ -17,49 +17,63 @@ use Illuminate\Http\Request;
  	return view('index');
  });
 
- Route::get('/demo', function(Request $request){
-     $time = time();
-     echo Utility::getReadableTime($time);
-     return;
- });
 
- Route::get('/generate/{count}', function($count){
- 	$hashids = new Hashids('smpx', 6);
- 	echo $hashids->encode($count);
- });
-
-Route::get('/urls/category/{name}/from/{from}/to/{to}', 'UrlController@getCotegoryUrls');
-
-
+ // Returns the total number of available Urls, excluding soft-deleted
  Route::get('/urls/count', 'UrlController@getCount');
-Route::get('/urls/city/{ip}', 'UrlController@getState');
-Route::get('/urls/{id}/analytics/country/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@countryAnalytics');
-Route::get('/urls/categories', 'UrlController@getCategories');
-Route::get('/urls/categories/count', 'UrlController@getCategoriesCount');
-Route::get('/urls/deleted', 'UrlController@getDeleted');
-Route::get('/urls/category/{name}/count', 'UrlController@getCotegoryUrlsCount');
 
 
- Route::resource ( '/urls', 'UrlController', ['only' => [
-    'index', 'show', 'create', 'store', 'edit', 'update']]
- );
+ // Returns the total available categories of Url and their count
+ Route::get('/urls/categories', 'UrlController@getCategories');
 
 
- Route::get('/urls/from/{from}/to/{to}', 'UrlController@getLimitedUrls');
+ // Returns the all soft-deleted Urls, with pagination
+ Route::get('/urls/deleted/{paginateCount}', 'UrlController@getPaginateDeleted');
 
- Route::get('/urls/{id}/analytics/clicks/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@clickAnalytics');
- Route::get('/urls/{id}/analytics/platform/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@platformAnalytics');
-  Route::get('/urls/{id}/analytics/referrer/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@referrerAnalytics');
- Route::get('/urls/{id}/delete', 'UrlController@destroy');
 
- Route::get('/urls/from/{from}', 'UrlController@getLimitedUrlsUsingFrom');
+ // Delete (Soft-Delete) the specified url by id
+ Route::get('/url/{id}/delete', 'UrlController@softDelete');
 
+
+ // Returns the total Url data comes within the specified range, with pagination
+ Route::get('/urls/{paginateCount}', 'UrlController@getPaginateUrls');
+
+
+ // create New Url and return the saved url data
+ Route::post('/url', 'UrlController@create');
+
+ // create New Url and return the saved url data
+ Route::delete('/url/{id}', 'UrlController@softDelete');
+
+
+ // Redirect to original Site
  Route::get('/{shortUrl}', 'UrlController@redirect');
+
+
+
+ //
+ // Route::get('/urls/{id}/analytics/clicks/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@clickAnalytics');
+ // Route::get('/urls/{id}/analytics/platform/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@platformAnalytics');
+ //  Route::get('/urls/{id}/analytics/referrer/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@referrerAnalytics');
+
+
+
 
  Route::get('/check', function(Request $request){
  	echo  $_COOKIE["name"];
  	return ;
  });
+
+
+  Route::get('/demo', function(Request $request){
+      $time = time();
+      echo Utility::getReadableTime($time);
+      return;
+  });
+
+  Route::get('/generate/{count}', function($count){
+  	$hashids = new Hashids('smpx', 6);
+  	echo $hashids->encode($count);
+  });
 
 
 /*

@@ -14,19 +14,14 @@ var elixir = require('laravel-elixir');
  elixir(function(mix) {
      mix.styles([
          "bootstrap.min.css",
-         "jqvmap.css",
          "styles.css",
-         "daterangepicker.css"
      ], 'public/assets/css/everything.css');
      mix.scripts([
          "jquery.min.js",
          "bootstrap.min.js",
-         "moment.min.js",
-         "daterangepicker.min.js",
-         "canvasjs.min.js",
-         "spin.min.js",
-         "script.js",
-         "analytics.js"
+         "vue.js",
+         "vue-resource.min.js",
+         "app.js"
      ], 'public/assets/js/everything.js');
      mix.version(['public/assets/js/everything.js', 'public/assets/css/everything.css']);
  });

@@ -15,6 +15,12 @@ class Url extends Model
 	use SoftDeletes;
 	protected $dates = ['deleted_at'];
 
+
+	// Constants for Column used in Utility Class for managing sorting criteria
+	const CLICKS = 'clicks';
+	const CREATED_AT = 'created_at';
+	const CATEGORY = 'category';
+
 	public function hits()
 	{
 		return $this->hasMany('App\Hit');

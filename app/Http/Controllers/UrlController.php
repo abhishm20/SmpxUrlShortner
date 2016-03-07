@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
 use Hashids\Hashids;
 use App\Url;
 use App\Http\Controllers\Controller;
@@ -17,6 +18,332 @@ use App\Classes\Utility;
 class UrlController extends Controller
 {
 
+
+	/*
+	* Returns count of Non-deleted Urls
+	*/
+	public function getCount(){
+		// Count the Urls form DB
+		$count = Url::count();
+
+		// Build the response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $count;
+
+		// Send the response Object as Json in response
+		return response()->json($res, 200);
+	}
+
+
+	/*
+	* Return all categories and their counts
+	*/
+	public function getCategories(){
+		//	Query the category and its count from DB
+		$urls = Url::select(\DB::raw('count(category) as count, category as name'))->groupBy('category')->get();
+
+		//	Build the response Object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $urls;
+		$res->count = $urls->count();
+
+		// Send the response object as json in response
+		return response()->json($res);
+	}
+
+	/*
+	* Return limited urls range $from with $length
+	*/
+	public function getPaginateUrls($paginateCount){
+		//	sorting query parameter
+		$givenSortCol = Input::get('sort');
+		$givenSortDesc = Input::get('desc');
+		$givenSortAsc = Input::get('asc');
+
+		//	validate and handle sorting data
+		$sortData = Utility::getSortData($givenSortCol, $givenSortDesc, $givenSortAsc);
+
+		// Query Url in paginated manner
+		$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+
+		// Set Index for indexing the urls
+		$index = 1;
+		$page = Input::get('page');
+		if(isset($page)){
+			$index = ($page-1) * $paginateCount + 1;
+		}
+
+		//	Add attribute 'time' as Human readable time( elapsed or remaining)
+		foreach ($urls as $key => $value) {
+			$value['index'] = $index++;
+			$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+		}
+
+		//	Build the response object
+		$res = new \stdClass();
+		$res->count = $urls->count();
+		$res->status = "Success";
+		$res->data = $urls;
+
+		//	Send response Object as json string
+		return response()->json($res, 200);
+	}
+
+	/*
+	* Return Soft- deleted url, with pagination
+	*/
+	public function getPaginateDeleted($paginateCount){
+		//	sorting query parameter
+		$givenSortCol = Input::get('sort');
+		$givenSortDesc = Input::get('desc');
+		$givenSortAsc = Input::get('asc');
+
+		//	validate and handle sorting data
+		$sortData = Utility::getSortData($givenSortCol, $givenSortDesc, $givenSortAsc);
+
+		// Query Url in paginated manner
+		$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->onlyTrashed()->paginate($paginateCount);
+
+		//	Add attribute 'time' as Human readable time( elapsed or remaining)
+		foreach ($urls as $key => $value) {
+			$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+		}
+
+		//	Build the response object
+		$res = new \stdClass();
+		$res->count = $urls->count();
+		$res->status = "Success";
+		$res->data = $urls;
+
+		//	Send response Object as json string
+		return response()->json($res, 200);
+	}
+
+	/*
+	* Soft Delete the Url specified by id
+	*/
+	public function softDelete($id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		// Query Url by id from DB
+		$url = Url::find($id);
+
+		//	validate queried url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		$url->delete($id);
+
+		// Build response object
+		$res = new \stdClass();
+		$res->status = 'Success';
+		$res->data = $url;
+		$res->message = 'Successfully Deleted';
+		return response()->json($res, 200);
+	}
+
+
+	/**
+	* Store a newly created Url in storage.
+	* Required: long_url
+	* Optional: custom_key, category
+	*/
+	public function create(Request $request){
+		//	Get the largest Id of url from db
+		$maxId = Url::max('id');
+
+		//	Validate maxId, and fix it
+		if(!isset($maxId)){
+			$maxId = 0;
+		}
+
+		//	Validate custom Key (key for short url), and generate new one using MAXID
+		if(empty($request["custom_key"])){
+			$hashids = new Hashids('smpx', 6);
+			$hashedUrl = $hashids->encode($maxId++);
+		}else{
+			$hashedUrl = $request["custom_key"];
+		}
+
+		//	trim long url (Original Url)
+		$longUrl = trim($request["long_url"]);
+
+		//	Validate Long Url and send error if invalid
+		if(strlen($longUrl) <= 0){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url');
+			return response()->json($error, 400);
+		}
+
+		//	Check whether Long url contains http protocol or not, If not then append 'http://'
+		//	Here not checking for protocols other than http
+		if(substr($longUrl, 0, 7) !== "http://" and substr($longUrl, 0, 8) !== "https://"){
+			$longUrl = 'http://' . $longUrl ;
+		}
+
+		//	Validate category
+		if(!isset($request["category"]) || $request["category"] == ''){
+			$category = 'no_category';
+		}else{
+			$category = $request["category"];
+		}
+
+		//	build array object of Url data to save to DB
+		$array = array(
+			'long_url' => $longUrl,
+			'short_url' => config('app.url'). '/' . $hashedUrl,
+			'is_active' => true,
+			'clicks' => 0,
+			'category' => $category
+		);
+
+		//	save Url data to DB
+		$urlInstance = Url::create($array);
+
+		//	Add attribute 'time' containing humna readable time format
+		$urlInstance['time'] = $urlInstance['created_at']->diffForHumans(Carbon::now());
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = 'Success';
+		$res->data = $urlInstance;
+		$res->message = 'Successfully created';
+
+		//	Send response Object in json string
+		return response()->json($res, 200);
+	}
+
+
+	/**
+	* Redirects to Original Url
+	*/
+	public function redirect(Request $request, $shortUrl){
+		//	Initiate Agent object for parsing header information
+		$agent = new Agent();
+
+		// Setting header to agent
+		$agent->setUserAgent($request->headers);
+
+		//	Query the url object from DB by shortUrl column
+		$urls = Url::where('short_url', '=', config('app.url'). '/' . $shortUrl)->get();
+
+		//	Check whether Url object exists
+		if(!$urls->first()){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		// get the queried url from collection
+		$url = $urls[0];
+
+		// Get the long_url value for managing query string
+		$longUrl = $url['long_url'];
+
+		try {
+			// Generate a version 1 (time-based) UUID object
+			if(!isset($_COOKIE['_id'])){
+				$cookieUuid1 = Uuid::uuid1();
+				setcookie('_id', $cookieUuid1->toString(), time() + 10 * 365 * 24 * 3600, "/");
+			}else{
+				$cookieUuid1 = $_COOKIE['_id'];
+			}
+			if(!isset($_COOKIE['_sid'])){
+				$sessionUuid1 = Uuid::uuid1();
+				setcookie('_sid', $sessionUuid1->toString(), 0, "/");
+			}else{
+				$sessionUuid1 = $_COOKIE['_sid'];
+			}
+		} catch (UnsatisfiedDependencyException $e){
+			$error = Utility::getError($e, 500, 'Error', 'Please try again...');
+			return response()->json($error, 500);
+		}
+
+		//	Default value of Http Referrer for saving into db
+		$httpReferrer = 'Undefined';
+
+		//	If Http referrer exists, replace the default value by it
+		if(!empty($_SERVER['HTTP_REFERER'])){
+			$httpReferrer = $_SERVER['HTTP_REFERER'];
+		}
+
+		try{
+			$city = $this->getCity($_SERVER["REMOTE_ADDR"]);
+			$state = $this->getState($_SERVER["REMOTE_ADDR"]);
+			$country = $this->getCountry($_SERVER["REMOTE_ADDR"]);
+			$countryIsoCode = $this->getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
+		}catch(AddressNotFoundException $e){
+			// Make logging for AddressNotFoundException exception
+			//Utility::log($e);
+			$city = '';
+			$state = '';
+			$country = '';
+			$countryIsoCode = '';
+		}
+
+		// Increment clicks  column by one
+		$url->clicks = $url['clicks'] +1;
+
+		//	Save the url instance
+		$url->save();
+
+		//	create the new Hit instance for the url instance
+		$url->hits()->create([
+			'client_ip' => $_SERVER['REMOTE_ADDR'],
+			'language' => $agent->languages()[0],
+			'device' => $agent->device(),
+			'platform' => $agent->platform(),
+			'browser' => $agent->browser(),
+			'cookie_id' => $cookieUuid1,
+			'session_id' => $sessionUuid1,
+			'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+			'referrers' => $httpReferrer,
+			'remote_addr' => $_SERVER["REMOTE_ADDR"],
+			'remote_port' => $_SERVER["REMOTE_PORT"],
+			'remote_method' => $_SERVER["REQUEST_METHOD"],
+			'city' => $city,
+			'state' => $state,
+			'country' => $country,
+			'country_iso_code' => $countryIsoCode
+		]);
+
+		//	Get all query parameter of short url
+		$shortQuery = $request->all();
+
+		//	Get all url parameter of long url
+		$parsedLongUrl = parse_url($longUrl);
+
+		//	Code for merging query parameter of short Url and long Url keeping the short url as prior
+		//	Redirect to the original Url
+		if(isset($parsedLongUrl["query"])){
+			parse_str($parsedLongUrl["query"], $longQuery);
+
+			$commonKeys = array_intersect_key($longQuery, $shortQuery);
+
+			$finalQuery = array_diff($shortQuery, $commonKeys) + array_diff($longQuery, $commonKeys) + $commonKeys;
+
+			if(isset($parsedLongUrl['port']))
+			return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . ':' . $parsedLongUrl['port'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
+			else
+			return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
+		}else{
+			if(empty($shortQuery))
+			return redirect($longUrl);
+			else
+			return redirect($longUrl . '?' . http_build_query($shortQuery));
+		}
+	}
+
+
+
+
+
 /*
 * Return urls from a specific category
 */
@@ -29,13 +356,7 @@ public function getCotegoryUrls($name, $from, $to){
 	echo $urls->toJson();
 }
 
-/*
-* Return all category count
-*/
-public function getCategoriesCount(){
-	$urls = Url::select(\DB::raw('count(category) as count, category'))->groupBy('category')->get()	;
-	echo $urls;
-}
+
 
 /*
 * Return urls count from a specific category
@@ -47,26 +368,8 @@ public function getCotegoryUrlsCount($name){
 }
 
 
-/*
-* Return count of URLS
-*/
-public function getCount(){
 
-	$urls = Url::count();
-	echo $urls;
-}
 
-/*
-* Return urls from a specific category
-*/
-public function getDeleted(){
-
-	$urls = Url::onlyTrashed()->get();
-	foreach ($urls as $key => $value) {
-		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
-	}
-	echo $urls->toJson();
-}
 
 /*
 * Return city of an ip
@@ -102,21 +405,6 @@ public function getCountry($ip){
 	return $record->country->name;
 }
 
-/*
-* Return limited url range $from $to
-*/
-public function getLimitedUrls($from, $to){
-
-	$urls = Url::take($to)->skip($from)->get();
-	foreach ($urls as $key => $value) {
-		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
-	}
-	$res = new \stdClass();
-	$res->count = $urls->count();
-	$res->status = "success";
-	$res->data = $urls;
-	echo json_encode($res);
-}
 
 /*
 * Return limited url using only from
@@ -132,111 +420,8 @@ public function getLimitedUrlsUsingFrom($from){
 	echo $urls->toJson();
 }
 
-/*
-* Return Cotegory of all urls
-*/
-public function getCategories(){
-	$urls = Url::select('category')->groupBy('category')->get();
-	echo $urls->toJson();
-	return;
-}
 
 
-/**
-* Redirect to long url
-* @return rediect to long url
-*/
-public function redirect(Request $request, $shortUrl){
-	$agent = new Agent();
-	$agent->setUserAgent($request->headers);
-
-	$urls = Url::where('short_url', '=', config('app.url'). '/' . $shortUrl)->get();
-	if(!$urls->first())
-	{
-		echo "Not Found";
-		return;
-	}
-	$url = $urls[0];
-	$longUrl = $url['long_url'];
-
-	try {
-		// Generate a version 1 (time-based) UUID object
-		if(!isset($_COOKIE['_id'])){
-			$cookieUuid1 = Uuid::uuid1();
-			setcookie('_id', $cookieUuid1->toString(), time() + 10 * 365 * 24 * 3600, "/");
-		}else{
-			$cookieUuid1 = $_COOKIE['_id'];
-		}
-		if(!isset($_COOKIE['_sid'])){
-			$sessionUuid1 = Uuid::uuid1();
-			setcookie('_sid', $sessionUuid1->toString(), 0, "/");
-		}else{
-			$sessionUuid1 = $_COOKIE['_sid'];
-		}
-	} catch (UnsatisfiedDependencyException $e){
-		// Some dependency was not met. Either the method cannot be called on a
-		// 32-bit system, or it can, but it relies on Moontoast\Math to be present.
-		echo 'Caught exception: ' . $e->getMessage() . "\n";
-	}
-	$httpReferrer = 'undefined';
-	if(!empty($_SERVER['HTTP_REFERER']))
-	$httpReferrer = $_SERVER['HTTP_REFERER'];
-
-	try{
-		$city = $this->getCity($_SERVER["REMOTE_ADDR"]);
-		$state = $this->getState($_SERVER["REMOTE_ADDR"]);
-		$country = $this->getCountry($_SERVER["REMOTE_ADDR"]);
-		$countryIsoCode = $this->getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
-	}catch(AddressNotFoundException $e){
-		$city = '';
-		$state = '';
-		$country = '';
-		$countryIsoCode = '';
-	}
-
-	$url->clicks = $url['clicks'] +1;
-	$url->save();
-	$url->hits()->create([
-		'client_ip' => $_SERVER['REMOTE_ADDR'],
-		'language' => $agent->languages()[0],
-		'device' => $agent->device(),
-		'platform' => $agent->platform(),
-		'browser' => $agent->browser(),
-		'cookie_id' => $cookieUuid1,
-		'session_id' => $sessionUuid1,
-		'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-		'referrers' => $httpReferrer,
-		'remote_addr' => $_SERVER["REMOTE_ADDR"],
-		'remote_port' => $_SERVER["REMOTE_PORT"],
-		'remote_method' => $_SERVER["REQUEST_METHOD"],
-		'city' => $city,
-		'state' => $state,
-		'country' => $country,
-		'country_iso_code' => $countryIsoCode
-	]);
-
-	$shortQuery = $request->all();
-
-	$parsedLongUrl = parse_url($longUrl);
-
-	if(isset($parsedLongUrl["query"])){
-		parse_str($parsedLongUrl["query"], $longQuery);
-
-		$commonKeys = array_intersect_key($longQuery, $shortQuery);
-
-		$finalQuery = array_diff($shortQuery, $commonKeys) + array_diff($longQuery, $commonKeys) + $commonKeys;
-
-		if(isset($parsedLongUrl['port']))
-		return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . ':' . $parsedLongUrl['port'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
-		else
-		return redirect($parsedLongUrl['scheme'] . '://' . $parsedLongUrl['host'] . $parsedLongUrl['path'] . '?' . http_build_query($finalQuery));
-	}else{
-		if(empty($shortQuery))
-		return redirect($longUrl);
-		else
-		return redirect($longUrl . '?' . http_build_query($shortQuery));
-	}
-}
 
 /**
 * Display a listing of the resource.
@@ -397,82 +582,7 @@ public function referrerAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $
 }
 
 
-/**
-* Show the form for creating a new resource.
-*
-* @return \Illuminate\Http\Response
-*/
-public function create(Request $request){
-	echo "done";
-	//
-}
 
-
-/**
-* Remove the specified resource from storage.
-*
-* @param  int  $id
-* @return \Illuminate\Http\Response
-*/
-public function destroy($id)
-{
-	$url = Url::find($id);
-	if(empty($url)){
-		echo 'Not Found';
-		return;
-	}
-	$url->delete($id);
-	echo $id;
-	return;
-}
-
-/**
-* Store a newly created resource in storage.
-*
-* @param  \Illuminate\Http\Request  $request
-* @return \Illuminate\Http\Response
-*/
-public function store(Request $request)
-{
-	$count = Url::max('id');
-	if(!isset($count))
-	$count = 0;
-
-	if(empty($request["customKey"])){
-		$hashids = new Hashids('smpx', 6);
-		$hashed_url = $hashids->encode($count++);
-	}else{
-		$hashed_url = $request["customKey"];
-	}
-
-	$longUrl = trim($request["long_url"]);
-
-	if(strlen($longUrl) <= 0){
-		echo 'Invalid Url';
-		return;
-	}
-	if(substr( $longUrl, 0, 7 ) !== "http://" and substr( $longUrl, 0, 8 ) !== "https://"){
-		$longUrl = 'http://' . $longUrl ;
-	}
-	if(!isset($request["category"]) || $request["category"] == ''){
-		$category = 'no_category';
-	}else{
-		$category = $request["category"];
-	}
-	$array = array(
-		'long_url' => $longUrl,
-		'short_url' => config('app.url'). '/' . $hashed_url,
-		'is_active' => true,
-		'clicks' => 0,
-		'category' => $category
-	);
-
-	$urlInstance = Url::create($array);
-
-	$urlInstance['time'] = $urlInstance['created_at']->diffForHumans(Carbon::now());
-	echo $urlInstance->toJson();
-	return;
-}
 
 
 /**

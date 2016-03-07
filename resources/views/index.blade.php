@@ -4,16 +4,16 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta charset="utf-8">
 	<title>Smartprix Url Shortner</title>
-	<meta name="generator" content="Bootply" />
+	<meta name="generator" content="" />
 	<meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link href="{{ elixir('assets/css/everything.css')}}" rel="stylesheet">
 
 </head>
 <body>
-	<div class="container-fluid">
+	<div id="app" class="container container-main">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-lg-12">
 				<div class="panel panel-default">
 					<div class="panel-heading text-center main-panel-header">Smartprix Url Shortening</div>
 					<div class="panel-body">
@@ -22,26 +22,30 @@
 								<div class="form-group">
 									<div class="input-group">
 										<span class="input-group-addon" id="basic-addon1">Long Url</span>
-										<input id="longUrl" name="longUrl" type="text" class="form-control" placeholder="Long Url" aria-describedby="basic-addon1">
+										<input id="longUrl" v-model="formData.long_url" name="longUrl" type="text" class="form-control" placeholder="Long Url" aria-describedby="basic-addon1">
 									</div>
 								</div>
 								<div class="row form-group">
 									<div class="col-md-6">
 										<div class="input-group">
 											<div class="input-group-btn">
-												<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category <span class="caret"></span></button>
+												<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+													Category <span class="caret"></span></button>
 												<ul id="categoryIn" class="dropdown-menu">
-													<li><a onClick="categoryInClick()" href="#">Default</a></li>
+													<li><a v-on:click.prevent="setFormCategory()" href="#">Default</a></li>
 													<li role="separator" class="divider"></li>
+													<li v-for="category in categories">
+    													<a v-on:click.prevent="setFormCategory(category.name)" href="#"><span class="tab">@{{category.name}}</span></a>
+  													</li>
 												</ul>
 											</div>
-											<input type="text" id="categoryInput" name="category" class="form-control" aria-label="..." placeholder="Default: None">
+											<input type="text" v-model="formData.category" id="categoryInput" name="category" class="form-control" aria-label="..." placeholder="Default: None">
 										</div>
 									</div>
 									<div class="col-md-6">
 										<div class="input-group">
 											<span class="input-group-addon" id="basic-addon1">Custom Key</span>
-											<input id="customKey" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
+											<input id="customKey" v-model="formData.custom_key" name="customKey" type="text" class="form-control" placeholder="default: None" aria-describedby="basic-addon1">
 										</div>
 									</div>
 								</div>
@@ -59,8 +63,11 @@
 										<span class="caret"></span>
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
-										<li><a onClick="categoryOutClick('all')" href="#">All</a></li>
+										<li><a v-on:click.prevent="setUrlFilterCategory()" href="#">All</a></li>
 										<li role="separator" class="divider"></li>
+										<li v-for="category in categories">
+											<a v-on:click.prevent="setUrlFilterCategory(category.name)" href="#"><span class="tab">@{{category.name}}</span></a>
+										</li>
 									</ul>
 								</div>
 							</div>
@@ -108,24 +115,30 @@
 										<th>Hits</th>
 									</tr>
 								</thead>
-								<tbody id="categoryData">
-								</tbody>
-								<tbody id="defaultData">
+								<tbody >
+									<tr v-for="url in urls">
+										<td>@{{url.index}}</td>
+										<td><a target='_blank' href="+data.long_url+">@{{url.long_url}}</a></td>
+										<td><a target='_blank' href="+data.short_url+">@{{url.short_url}}</a></td>
+										<td>@{{url.time}}</td>
+										<td>@{{url.category}}</td>
+										<td><button type='button' v-on:click.prevent="deleteUrl(url.id)" class='btn btn-default btn-xs'>Delete</button></td>
+										<td><button type='button' v-on:click.prevent="analyse(url.id)" class='btn btn-default btn-xs'>@{{url.clicks}} analyse</button></td>
+									</tr>
 								</tbody>
 							</table>
 							<div class="row">
 								<div class="col-md-6">
 									<span class="pull-left btn-group" role="group" aria-label="...">
-										showing <span id="pageLabel"></span><br/>page : <span id="pageNumber"></span>
+										showing: @{{urlData.to - urlData.from + 1}} of @{{urlData.total}}
+										<br/>
+										page: @{{urlData.current_page}} of @{{urlData.last_page}}
 									</span>
 								</div>
 								<div class="col-md-6">
 									<span id="" class="pull-right btn-group" role="group" aria-label="...">
-										<button type="button" id="prevButton" onclick="return gotoPrevPage()" class="btn btn-sm btn-default">Prev</button>
-										<button type='button' id="backPageCounter" onclick='expandPageCounter(0)' class='btn btn-sm btn-default'> ... </button>
-										<span id="pageCounter" style="float:left;" class=" btn-group"></span>
-										<button type='button' id="forePageCounter" onclick='expandPageCounter(1)' class='btn btn-sm btn-default'> ... </button>
-										<button type="button" id="nextButton" onclick="return gotoNextPage()" class="btn btn-sm btn-default">Next</button>
+										<button type="button" id="prevButton" v-on:click="prevPage()" :disabled="urlData.current_page == 1" class="btn btn-sm btn-default">Prev</button>
+										<button type="button" id="nextButton" v-on:click="nextPage()" :disabled="urlData.current_page == urlData.last_page" class="btn btn-sm btn-default">Next</button>
 									</span>
 								</div>
 							</div>
@@ -133,7 +146,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6">
+			<!-- <div class="col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-heading text-center stats-panel-header">Analytics of Short Urls</div>
 					<div class="panel-body" id="analyticsPanel">
@@ -189,7 +202,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 
 			<script src="{{ elixir('assets/js/everything.js')}}"></script>
 		</body>
