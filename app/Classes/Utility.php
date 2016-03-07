@@ -3,6 +3,7 @@ namespace App\Classes;
 
 use Carbon\Carbon;
 use App\Url;
+use GeoIp2\Database\Reader;
 
 class Utility{
 
@@ -64,12 +65,48 @@ class Utility{
         510 => 'Not Extended'
     );
 
+
+
+    /*
+    * Return city of an ip
+    */
+    public static function getCity($ip){
+        $reader = new Reader(config('app.ipdb'));
+    	$record = $reader->city($ip);
+    	return $record->city->name;
+    }
+    /*
+    * Return state of an ip
+    */
+    public static function getState($ip){
+        $reader = new Reader(config('app.ipdb'));
+    	$record = $reader->city($ip);
+    	return $record->mostSpecificSubdivision->name;
+    }
+    /*
+    * Return country iso code of an ip
+    */
+    public static function getCountryIsoCode($ip){
+        $reader = new Reader(config('app.ipdb'));
+    	$record = $reader->city($ip);
+    	return $record->country->isoCode;
+    }
+
+    /*
+    * Return country name of an ip
+    */
+    public static function getCountry($ip){
+        $reader = new Reader(config('app.ipdb'));
+    	$record = $reader->city($ip);
+    	return $record->country->name;
+    }
+
     // Builds the Error Object and returns it
     public static function getError($exception, $code, $name, $message){
         $error = new \stdClass();
 
         if(isset($exception)){
-            
+
         }
         $error->name = $name;
         $error->message = $message;
@@ -87,7 +124,6 @@ class Utility{
         //  check col for empty and set the default value
         if(isset($sortCol) && trim($sortCol) !== ''){
             if(!strcasecmp($sortCol, 'time')){
-                return 'hello';
                 $defaultSortCol =  Url::CREATED_AT;
             }else if(!strcasecmp($sortCol, 'hits')){
                 $defaultSortCol =  Url::CLICKS;

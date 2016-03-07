@@ -12,7 +12,6 @@ use PhpParser\Node\Expr\Cast\Object_;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use Carbon\Carbon;
-use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
 use App\Classes\Utility;
 use Illuminate\Database\QueryException;
@@ -292,10 +291,10 @@ class UrlController extends Controller
 		}
 
 		try{
-			$city = $this->getCity($_SERVER["REMOTE_ADDR"]);
-			$state = $this->getState($_SERVER["REMOTE_ADDR"]);
-			$country = $this->getCountry($_SERVER["REMOTE_ADDR"]);
-			$countryIsoCode = $this->getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
+			$city = Utility::getCity($_SERVER["REMOTE_ADDR"]);
+			$state = Utility::getState($_SERVER["REMOTE_ADDR"]);
+			$country = Utility::getCountry($_SERVER["REMOTE_ADDR"]);
+			$countryIsoCode = Utility::getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
 		}catch(AddressNotFoundException $e){
 			// Make logging for AddressNotFoundException exception
 			//Utility::log($e);
@@ -385,41 +384,6 @@ public function getCotegoryUrlsCount($name){
 
 
 
-
-
-/*
-* Return city of an ip
-*/
-public function getCity($ip){
-	$reader = new Reader(config('app.ipdb'));
-	$record = $reader->city($ip);
-	return $record->city->name;
-}
-/*
-* Return state of an ip
-*/
-public function getState($ip){
-	$reader = new Reader(config('app.ipdb'));
-	$record = $reader->city($ip);
-	return $record->mostSpecificSubdivision->name;
-}
-/*
-* Return country iso code of an ip
-*/
-public function getCountryIsoCode($ip){
-	$reader = new Reader(config('app.ipdb'));
-	$record = $reader->city($ip);
-	return $record->country->isoCode;
-}
-
-/*
-* Return country name of an ip
-*/
-public function getCountry($ip){
-	$reader = new Reader(config('app.ipdb'));
-	$record = $reader->city($ip);
-	return $record->country->name;
-}
 
 
 /*

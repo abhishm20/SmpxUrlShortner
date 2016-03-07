@@ -18,11 +18,23 @@ new Vue({
             category: "",
             search: "",
             desc: "",
-            asc: ""
+            asc: "",
+            sort: ""
         }
     },
 
     methods:{
+        setUrlSorting: function(sort, type){
+            if(type == 'desc'){
+                this.urlFilterData.desc = 1;
+            }else if(type == 'asc'){
+                this.urlFilterData.asc = 1;
+            }
+            this.urlFilterData.sort = sort;
+            console.log(JSON.stringify(this.urlFilterData));
+
+            this.getUrls();
+        },
         createUrl: function(e){
             console.log(JSON.stringify(this.formData));
             this.$http.post('url', this.formData).then(function(data){

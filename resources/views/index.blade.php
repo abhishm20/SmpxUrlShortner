@@ -59,7 +59,7 @@
 							<div class="col-md-3">
 								<div class="dropdown">
 									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-										Category : All
+										Category : @{{urlFilterData.category}}
 										<span class="caret"></span>
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -79,10 +79,12 @@
 										<span class="caret"></span>
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
-										<li><a onClick="categoryOutClick()" href="#">Creation increasing</a></li>
-										<li><a onClick="categoryOutClick()" href="#">Creation decreasing</a></li>
-										<li><a onClick="categoryOutClick()" href="#">Most Clicked</a></li>
-										<li><a onClick="categoryOutClick()" href="#">Less Clicked</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('time', 'asc')" href="#">Creation increasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('time', 'desc')" href="#">Creation decreasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('hits', 'desc')" href="#">Most Clicked</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('hits', 'asc')" href="#">Less Clicked</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'asc')" href="#">Category increasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'desc')" href="#">Category decreasing</a></li>
 									</ul>
 								</div>
 							</div>
