@@ -18,6 +18,10 @@ use Illuminate\Http\Request;
  });
 
 
+ // create New Url and return the saved url data
+ Route::post('/url', 'UrlController@create');
+
+
  // Returns the total number of available Urls, excluding soft-deleted
  Route::get('/urls/count', 'UrlController@getCount');
 
@@ -37,9 +41,6 @@ use Illuminate\Http\Request;
  // Returns the total Url data comes within the specified range, with pagination
  Route::get('/urls/{paginateCount}', 'UrlController@getPaginateUrls');
 
-
- // create New Url and return the saved url data
- Route::post('/url', 'UrlController@create');
 
  // create New Url and return the saved url data
  Route::delete('/url/{id}', 'UrlController@softDelete');

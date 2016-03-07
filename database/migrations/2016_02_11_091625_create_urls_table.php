@@ -22,6 +22,8 @@ class CreateUrlsTable extends Migration
             $table->bigInteger('clicks');
             $table->string('category');
             $table->softDeletes();
+
+            $table->unique('short_url');
         });
     }
 

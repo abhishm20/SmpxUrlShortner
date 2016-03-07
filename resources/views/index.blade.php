@@ -89,7 +89,7 @@
 							<div class="col-md-3">
 								<div class="input-group input-group-sm">
 									<span class="input-group-addon " id="basic-addon1"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
-									<input type="text" class="form-control" placeholder="Search" aria-describedby="basic-addon1">
+									<input type="text" v-model="urlFilterData.search" @keyup="searchUrl" class="form-control" placeholder="Search on Long Url" aria-describedby="basic-addon1">
 								</div>
 							</div>
 
@@ -117,9 +117,9 @@
 								</thead>
 								<tbody >
 									<tr v-for="url in urls">
-										<td>@{{url.index}}</td>
-										<td><a target='_blank' href="+data.long_url+">@{{url.long_url}}</a></td>
-										<td><a target='_blank' href="+data.short_url+">@{{url.short_url}}</a></td>
+										<td>@{{urlData.from + $index}}</td>
+										<td><a target='_blank' href="@{{url.long_url}}">@{{url.long_url}}</a></td>
+										<td><a target='_blank' href="@{{url.short_url}}">@{{url.short_url}}</a></td>
 										<td>@{{url.time}}</td>
 										<td>@{{url.category}}</td>
 										<td><button type='button' v-on:click.prevent="deleteUrl(url.id)" class='btn btn-default btn-xs'>Delete</button></td>

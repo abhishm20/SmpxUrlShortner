@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
 use App\Classes\Utility;
+use Illuminate\Database\QueryException;
+
 class UrlController extends Controller
 {
 
@@ -62,22 +64,31 @@ class UrlController extends Controller
 		$givenSortDesc = Input::get('desc');
 		$givenSortAsc = Input::get('asc');
 
+		//	Category query parameter
+		$category = Input::get('category');
+
+		//	Seach query parameter
+		$search = Input::get('search');
+
 		//	validate and handle sorting data
 		$sortData = Utility::getSortData($givenSortCol, $givenSortDesc, $givenSortAsc);
 
 		// Query Url in paginated manner
-		$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
-
-		// Set Index for indexing the urls
-		$index = 1;
-		$page = Input::get('page');
-		if(isset($page)){
-			$index = ($page-1) * $paginateCount + 1;
+		if(isset($category) && $category !== '' && (!isset($search) || $search === '')){
+			$urls = Url::where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+		}
+		else if(isset($search) && $search !== '' && (!isset($category) || $category === '')){
+			$urls = Url::where('long_url', 'like', '%'.$search.'%')->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+		}
+		else if(isset($category) && $category !== '' && isset($search) && $search !== ''){
+			$urls = Url::where('long_url', 'like', '%'.$search.'%')->where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+		}
+		else{
+			$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
 		}
 
 		//	Add attribute 'time' as Human readable time( elapsed or remaining)
 		foreach ($urls as $key => $value) {
-			$value['index'] = $index++;
 			$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
 		}
 
@@ -204,8 +215,15 @@ class UrlController extends Controller
 			'category' => $category
 		);
 
-		//	save Url data to DB
-		$urlInstance = Url::create($array);
+		try{
+			//	save Url data to DB
+			$urlInstance = Url::create($array);
+		}catch(QueryException $e){
+			// Make logging for QueryException
+			$error = Utility::getError(null, 400, 'Error', 'Duplicate Entry of short Url');
+			return response()->json($error, 400);
+		}
+
 
 		//	Add attribute 'time' containing humna readable time format
 		$urlInstance['time'] = $urlInstance['created_at']->diffForHumans(Carbon::now());
@@ -339,8 +357,6 @@ class UrlController extends Controller
 			return redirect($longUrl . '?' . http_build_query($shortQuery));
 		}
 	}
-
-
 
 
 
