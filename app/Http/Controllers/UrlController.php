@@ -455,7 +455,7 @@ class UrlController extends Controller
 		->count('id');
 
 
-		//
+		//	fetch click session, total, cookie data
 		$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 		->select(\DB::raw('created_at, session_id'))->get()
 		->groupBy(function($date) {
@@ -473,10 +473,14 @@ class UrlController extends Controller
 		->groupBy(function($date) {
 			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
 		});
+
+		//	Final result object
 		$clickResult = array(array());
 		$clickSessionResult = array();
 		$clickUserResult = array();
 		$clickTotalResult = array();
+
+		//	Count the fetch data and set final result
 		foreach ($clickSessionData as $key => $value) {
 			$distinctArray = array();
 			foreach ($value as $valueKey => $valueValue) {
@@ -507,9 +511,148 @@ class UrlController extends Controller
 		$clickResult['cookieCount'] = $clickCookieCount;
 		$clickResult['totalCount'] = $clickTotalCount;
 		unset($clickResult[0]);
-		echo json_encode($clickResult);
-		return;
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $clickResult;
+		return response()->json($res, 200);
 	}
+
+
+	/**
+	* Returns the url Platform analytics data
+	*/
+	public function getPlatformAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, platform'))
+		->groupBy('platform')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $platformData;
+		return response()->json($res, 200);
+	}
+
+
+	/**
+	* Returns the url Referrer analytics data
+	*/
+	public function getReferrerAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, referrers'))
+		->groupBy('referrers')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $referrerData;
+		return response()->json($res, 200);
+
+	}
+
+
+	/**
+	* Returns the url Country analytics data
+	*/
+	public function getCountryAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, country_iso_code, country'))
+		->groupBy('country_iso_code')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $countryData;
+		return response()->json($res, 200);
+
+	}
+
+
+
+
+
+
+
+
+
+
 
 /*
 * Return urls from a specific category
@@ -576,27 +719,7 @@ public function index(Request $request){
 
 
 
-/**
-* Returns the url Platform analytics data
-*/
-public function platformAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
-	$url = Url::find($id);
 
-	if(empty($url)){
-		echo 'Not Found';
-		return;
-	}
-
-	Utility::getUnit($unit);
-
-	$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('count(*) as count, platform'))
-	->groupBy('platform')
-	->get();
-	echo json_encode($platformData);
-	return;
-
-}
 
 /**
 * Returns the country analytics
@@ -618,27 +741,7 @@ public function countryAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $u
 
 }
 
-/**
-* Returns the url Referrer analytics data
-*/
-public function referrerAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
-	$url = Url::find($id);
 
-	if(empty($url)){
-		echo 'Not Found';
-		return;
-	}
-
-	Utility::getUnit($unit);
-
-	$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('count(*) as count, referrers'))
-	->groupBy('referrers')
-	->get();
-	echo json_encode($referrerData);
-	return;
-
-}
 
 
 

@@ -19,13 +19,13 @@
                     <div class="panel-body" id="analyticsPanel">
                         <div class="container-fluid">
                             <div class="btn-group btn-group-sm pull-left" role="group" aria-label="...">
-                                <button type="button" @click="changeUnit('yr')" class="btn btn-default">Year</button>
-                                <button type="button" @click="changeUnit('mnth')" class="btn btn-default">Month</button>
-                                <button type="button" @click="changeUnit('wk')" class="btn btn-default">Week</button>
-                                <button type="button" @click="changeUnit('dt')" class="btn btn-default">Date</button>
-                                <button type="button" @click="changeUnit('hr')" class="btn btn-default">Hour</button>
-                                <button type="button" @click="changeUnit('min')" class="btn btn-default">Minute</button>
-                                <button type="button" @click="changeUnit('sc')" class="btn btn-default">Second</button>
+                                <button type="button" @click="changeUnit('yr')" :disabled="filterData.u=='yr'" class="btn btn-default">Year</button>
+                                <button type="button" @click="changeUnit('mnth')" :disabled="filterData.u=='mnth'" class="btn btn-default">Month</button>
+                                <button type="button" @click="changeUnit('wk')" :disabled="filterData.u=='wk'" class="btn btn-default">Week</button>
+                                <button type="button" @click="changeUnit('dt')" :disabled="filterData.u=='dt'" class="btn btn-default">Date</button>
+                                <button type="button" @click="changeUnit('hr')" :disabled="filterData.u=='hr'" class="btn btn-default">Hour</button>
+                                <button type="button" @click="changeUnit('min')" :disabled="filterData.u=='min'" class="btn btn-default">Minute</button>
+                                <button type="button" @click="changeUnit('sc')" :disabled="filterData.u=='sc'" class="btn btn-default">Second</button>
                             </div>
                             <div class="pull-right">
                                 <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
@@ -42,9 +42,9 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    Session : <span id="sessionCount"></span>,
-                                    User : <span id="cookieCount"></span>,
-                                    Total : <span id="totalCount"></span>
+                                    Session : @{{clickData.sessionCount}},
+                                    User : @{{clickData.cookieCount}},
+                                    Total : @{{clickData.totalCount}}
                                 </div>
                             </div>
                         </div>
@@ -57,12 +57,13 @@
                                 <div id="referrerGraph" style="height: 300px; width: 100%;"></div>
                             </div>
                         </div>
+                        <hr>
                         <div class="row">
                             <div class="col-md-6 mycontent-left" id="countryPanel">
+                                <div>
+                                    <p>Country Analysis</p>
+                                </div>
                                 <div id="countryGraph" style="height: 300px; width: 100%;"></div>
-                            </div>
-                            <div class="col-md-6" id="referrerPanel">
-                                <div id="referrerGraph" style="height: 100%; width: 100%;"></div>
                             </div>
                         </div>
                     </div>

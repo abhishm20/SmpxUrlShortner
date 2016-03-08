@@ -24,20 +24,31 @@ use Illuminate\Http\Request;
  // create New Url and return the saved url data
  Route::post('/url', 'UrlController@create');
 
-
  // Returns the total number of available Urls, excluding soft-deleted
  Route::get('/urls/count', 'UrlController@getCount');
-
 
  // Returns the total available categories of Url and their count
  Route::get('/urls/categories', 'UrlController@getCategories');
 
-
  // Delete (Soft-Delete) the specified url by id
  Route::get('/url/{id}/delete', 'UrlController@softDelete');
 
+
+
  // Return Click analytics Data of an url
  Route::get('/url/{id}/analytics/click', 'UrlController@getClickAnalytics');
+
+ // Return platform analytics Data of an url
+ Route::get('/url/{id}/analytics/platform', 'UrlController@getPlatformAnalytics');
+
+ // Return platform analytics Data of an url
+ Route::get('/url/{id}/analytics/referrer', 'UrlController@getReferrerAnalytics');
+
+ // Return country analytics Data of an url
+ Route::get('/url/{id}/analytics/country', 'UrlController@getCountryAnalytics');
+
+
+
 
  // Returns the total Url data comes within the specified range, with pagination
  Route::get('/urls/{paginateCount}', 'UrlController@getPaginateUrls');

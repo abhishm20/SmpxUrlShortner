@@ -1,6 +1,8 @@
 var Constants = {
-  defaultUrl:'urls/10'
+    defaultUrl:'urls/10'
 }
+
+
 var sample_data = {"af":"16.63","in":"12"};
 var countryGraph = {
     map: 'world_en',
@@ -14,14 +16,15 @@ var countryGraph = {
     values: sample_data,
     normalizeFunction: 'polynomial',
     onLabelShow: function(event, label, code) {
-                        label[0].innerHTML = label[0].innerHTML + " - The state where I live!!";
-                }
+        label[0].innerHTML = label[0].innerHTML + " - The state where I live!!";
+    }
 };
 
 var clickGraph = new CanvasJS.Chart("clickGraph",{
     theme:"theme2",
     title:{
-        text: "Click Analysis"
+        text: "Click Analysis",
+        fontSize: 20
     },
     animationEnabled: true,
     toolTip: {
@@ -69,7 +72,8 @@ var platformGraph = new CanvasJS.Chart("platformGraph",{
     title:{
         text: "Platform Analysis",
         verticalAlign: 'top',
-        horizontalAlign: 'left'
+        horizontalAlign: 'left',
+        fontSize: 20
     },
     animationEnabled: true,
     data: [
@@ -88,7 +92,8 @@ var referrerGraph = new CanvasJS.Chart("referrerGraph",{
     title:{
         text: "Referrer Analysis",
         verticalAlign: 'top',
-        horizontalAlign: 'left'
+        horizontalAlign: 'left',
+        fontSize: 20
     },
     animationEnabled: true,
     data: [
@@ -113,9 +118,10 @@ new Vue({
             t: '',
             u: 'dt'
         },
-        clickData: {
-
-        },
+        clickData: {},
+        countryData: {},
+        platformData: {},
+        referrerData: {},
         currentUrl: {}
     },
 
@@ -130,22 +136,62 @@ new Vue({
             this.queryId = decodeURIComponent(results[2].replace(/\+/g, " "));
             this.$http.get('url/'+this.queryId).then(function(res){
                 this.currentUrl = res.data.data;
-                //console.log(JSON.stringify(this.currentUrl));
+                this.initiateDateRangePicker();
             });
-
         },
         changeUnit: function(unit){
             this.filterData.u = unit;
-            this.getClickAnalytics();
+            this.drawGraphs();
         },
         getClickAnalytics: function(){
             this.$http.get('url/'+this.queryId+'/analytics/click?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
-                console.log(JSON.stringify(res.data));
+                this.clickData = res.data.data;
+                xValues = Object.keys(this.clickData);
+                clickGraph.options.data[0].dataPoints = [];
+                clickGraph.options.data[1].dataPoints = [];
+                clickGraph.options.data[2].dataPoints = [];
+                for (xValue of xValues) {
+                    types = Object.keys(this.clickData[xValue]);
+                    if(xValue == 'sessionCount' || xValue == 'cookieCount' || xValue == 'totalCount') continue;
+                    clickGraph.options.data[0].dataPoints.push({label: xValue, y : this.clickData[xValue]['total']});
+                    clickGraph.options.data[1].dataPoints.push({label: xValue, y : this.clickData[xValue]['user']});
+                    clickGraph.options.data[2].dataPoints.push({label: xValue, y : this.clickData[xValue]['session']});
+                }
+                clickGraph.render();
             });
-            //$('#countryGraph').vectorMap(countryGraph);
-            // clickGraph.render();
-            // platformGraph.render();
-            // referrerGraph.render();
+        },
+        getPlatformAnalytics: function(){
+            this.$http.get('url/'+this.queryId+'/analytics/platform?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+                this.platformData = res.data.data;
+                platformGraph.options.data[0].dataPoints = [];
+                for (pf of this.platformData) {
+                    platformGraph.options.data[0].dataPoints.push({y : pf['count'], label: pf['platform']});
+                }
+                platformGraph.render();
+            });
+        },
+        getReferrerAnalytics: function(){
+            this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+                this.referrerData = res.data.data;
+                referrerGraph.options.data[0].dataPoints = [];
+                for (referrer of this.referrerData) {
+                    referrerGraph.options.data[0].dataPoints.push({label: referrer['referrers'], y : referrer['count']});
+                }
+                referrerGraph.render();
+            });
+        },
+        getCountryAnalytics: function(){
+            this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+                this.countryData = res.data.data;
+                countryGraph.values = this.countryData;
+                $('#countryGraph').vectorMap(countryGraph);
+            });
+        },
+        drawGraphs: function(){
+            this.getClickAnalytics();
+            this.getPlatformAnalytics();
+            this.getReferrerAnalytics();
+            this.getCountryAnalytics();
         },
         initiateDateRangePicker: function(){
             var self = this;
@@ -153,7 +199,8 @@ new Vue({
                 $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
                 self.filterData.f = start.format('YYYY-MM-DD hh:mm:ss');
                 self.filterData.t = end.format('YYYY-MM-DD hh:mm:ss');
-                console.log(self.filterData.t);
+                console.log('time: '+self.filterData.f);
+                self.drawGraphs();
             }
             cb(moment().subtract(1, 'days'), moment().endOf('day'));
 
@@ -175,9 +222,7 @@ new Vue({
         }
     },
     created: function(){
-        this.initiateDateRangePicker();
-        this.setUrl();
-        this.getClickAnalytics();
+        this.setUrl();  //also calls the draw graph
     }
 
-})
+});
