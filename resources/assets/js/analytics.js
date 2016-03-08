@@ -184,7 +184,7 @@ new Vue({
             this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.countryData = res.data.data;
                 console.log(this.countryData);
-                //countryGraph.values = this.countryData;
+                countryGraph.values = this.countryData;
                 $('#countryGraph').vectorMap(countryGraph);
             });
         },
