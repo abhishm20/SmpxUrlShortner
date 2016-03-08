@@ -183,7 +183,7 @@ new Vue({
         getCountryAnalytics: function(){
             this.$http.get('url/'+this.queryId+'/analytics/country?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.countryData = res.data.data;
-                
+            
                 countryGraph.values = this.countryData;
                 $('#countryGraph').vectorMap(countryGraph);
             });

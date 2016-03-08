@@ -1,2 +1,3 @@
 public/assets/*
-config/app/php
+public/build/*
+config/app.php
