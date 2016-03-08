@@ -12,16 +12,45 @@ var elixir = require('laravel-elixir');
  */
 
  elixir(function(mix) {
+
+     // Style for Index page
      mix.styles([
          "bootstrap.min.css",
          "styles.css",
-     ], 'public/assets/css/everything.css');
+     ], 'public/assets/css/index.css');
+
+     // Scripts for Index page
      mix.scripts([
          "jquery.min.js",
          "bootstrap.min.js",
          "vue.js",
          "vue-resource.min.js",
          "app.js"
-     ], 'public/assets/js/everything.js');
-     mix.version(['public/assets/js/everything.js', 'public/assets/css/everything.css']);
+     ], 'public/assets/js/index.js');
+
+     // Styles for analytics page
+     mix.styles([
+         "bootstrap.min.css",
+         "styles.css",
+         "daterangepicker.css",
+         "morris.css",
+         "jqvmap.css"
+     ], 'public/assets/css/analytics.css');
+
+     // Scripts for analytics page
+     mix.scripts([
+         "jquery.min.js",
+         "bootstrap.min.js",
+         "vue.js",
+         "vue-resource.min.js",
+         "moment.min.js",
+         "daterangepicker.min.js",
+         "canvasjs.min.js",
+         "jquery.vmap.min.js",
+         "jquery.vmap.world.js",
+         "analytics.js"
+     ], 'public/assets/js/analytics.js');
+
+     // Version css and js of both pages
+     mix.version(['public/assets/js/index.js', 'public/assets/css/index.css', 'public/assets/js/analytics.js', 'public/assets/css/analytics.css']);
  });

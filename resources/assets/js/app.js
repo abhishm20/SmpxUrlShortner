@@ -26,6 +26,12 @@ new Vue({
     },
 
     methods:{
+        analyse: function(id){
+            window.open(
+                "/analytics?id="+id,
+                '_blank' // <- This is what makes it open in a new window.
+            );
+        },
         deleteUrl: function(id){
             this.$http.get('/url/'+id+'/delete').then(function(res){
                 window.location.href="/";

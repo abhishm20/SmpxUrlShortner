@@ -16,6 +16,9 @@ use Illuminate\Http\Request;
  Route::get('/', function(){
  	return view('index');
  });
+ Route::get('/analytics', function(){
+   return view('analytics');
+ });
 
 
  // create New Url and return the saved url data
