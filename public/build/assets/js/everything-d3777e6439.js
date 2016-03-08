@@ -9730,19 +9730,33 @@ new Vue({
             search: "",
             desc: "",
             asc: "",
-            sort: ""
+            sort: "",
+            sortName: "Time Increasing",
+            del: false // It take the previous value of checkbox, so inverse this for taking real effect
         }
     },
 
     methods:{
-        setUrlSorting: function(sort, type){
+        deleteUrl: function(id){
+            this.$http.get('/url/'+id+'/delete').then(function(res){
+                window.location.href="http://localhost:8000/";
+            });
+        },
+        showDeleted: function(){
+            this.urlFilterData.del = !this.urlFilterData.del;
+            this.getUrls();
+        },
+        setUrlSorting: function(sort, type, name){
             if(type == 'desc'){
                 this.urlFilterData.desc = 1;
+                this.urlFilterData.asc = 0;
             }else if(type == 'asc'){
                 this.urlFilterData.asc = 1;
+                this.urlFilterData.desc = 0;
             }
             this.urlFilterData.sort = sort;
-            console.log(JSON.stringify(this.urlFilterData));
+            this.urlFilterData.sortName = name;
+            //console.log(JSON.stringify(this.urlFilterData));
 
             this.getUrls();
         },
@@ -9792,7 +9806,11 @@ new Vue({
             if(this.urlFilterData.asc){
                 query.push('asc=1');
             }
+            if(this.urlFilterData.del){
+                query.push('del=1');
+            }
             query = a+query.join('&');
+            console.log(urlLink+query);
             this.$http.get(urlLink+query).then(function(res){
                 this.urls = res.data.data.data;
                 delete(res.data.data["data"]);

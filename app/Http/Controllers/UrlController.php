@@ -69,21 +69,40 @@ class UrlController extends Controller
 		//	Seach query parameter
 		$search = Input::get('search');
 
+		// Get del query parameter for quering only deleted urls
+		$isDeleted = Input::get('del');
+
 		//	validate and handle sorting data
 		$sortData = Utility::getSortData($givenSortCol, $givenSortDesc, $givenSortAsc);
 
-		// Query Url in paginated manner
-		if(isset($category) && $category !== '' && (!isset($search) || $search === '')){
-			$urls = Url::where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
-		}
-		else if(isset($search) && $search !== '' && (!isset($category) || $category === '')){
-			$urls = Url::where('long_url', 'like', '%'.$search.'%')->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
-		}
-		else if(isset($category) && $category !== '' && isset($search) && $search !== ''){
-			$urls = Url::where('long_url', 'like', '%'.$search.'%')->where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
-		}
-		else{
-			$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+		if(isset($isDeleted) && $isDeleted == true){
+			// Query Deleted Url in paginated manner
+			if(isset($category) && $category !== '' && (!isset($search) || $search === '')){
+				$urls = Url::where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->onlyTrashed()->paginate($paginateCount);
+			}
+			else if(isset($search) && $search !== '' && (!isset($category) || $category === '')){
+				$urls = Url::where('long_url', 'like', '%'.$search.'%')->orderBy($sortData->sortCol, $sortData->sortType)->onlyTrashed()->paginate($paginateCount);
+			}
+			else if(isset($category) && $category !== '' && isset($search) && $search !== ''){
+				$urls = Url::where('long_url', 'like', '%'.$search.'%')->where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->onlyTrashed()->paginate($paginateCount);
+			}
+			else{
+				$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->onlyTrashed()->paginate($paginateCount);
+			}
+		}else{
+			// Query Url in paginated manner
+			if(isset($category) && $category !== '' && (!isset($search) || $search === '')){
+				$urls = Url::where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+			}
+			else if(isset($search) && $search !== '' && (!isset($category) || $category === '')){
+				$urls = Url::where('long_url', 'like', '%'.$search.'%')->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+			}
+			else if(isset($category) && $category !== '' && isset($search) && $search !== ''){
+				$urls = Url::where('long_url', 'like', '%'.$search.'%')->where('category', $category)->orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+			}
+			else{
+				$urls = Url::orderBy($sortData->sortCol, $sortData->sortType)->paginate($paginateCount);
+			}
 		}
 
 		//	Add attribute 'time' as Human readable time( elapsed or remaining)

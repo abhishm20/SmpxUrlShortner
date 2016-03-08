@@ -31,7 +31,7 @@ use Illuminate\Http\Request;
 
 
  // Returns the all soft-deleted Urls, with pagination
- Route::get('/urls/deleted/{paginateCount}', 'UrlController@getPaginateDeleted');
+ //Route::get('/urls/deleted/{paginateCount}', 'UrlController@getPaginateDeleted');
 
 
  // Delete (Soft-Delete) the specified url by id

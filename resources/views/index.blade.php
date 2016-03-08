@@ -75,16 +75,16 @@
 							<div class="col-md-3">
 								<div class="dropdown">
 									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-										Sort : created first
+										Sort : @{{urlFilterData.sortName}}
 										<span class="caret"></span>
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
-										<li><a v-on:click.prevent="setUrlSorting('time', 'asc')" href="#">Creation increasing</a></li>
-										<li><a v-on:click.prevent="setUrlSorting('time', 'desc')" href="#">Creation decreasing</a></li>
-										<li><a v-on:click.prevent="setUrlSorting('hits', 'desc')" href="#">Most Clicked</a></li>
-										<li><a v-on:click.prevent="setUrlSorting('hits', 'asc')" href="#">Less Clicked</a></li>
-										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'asc')" href="#">Category increasing</a></li>
-										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'desc')" href="#">Category decreasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('time', 'asc', 'Time decreasing')" href="#">Time decreasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('time', 'desc', 'Time Increasing')" href="#">Time Increasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('hits', 'desc', 'Most Clicked')" href="#">Most Clicked</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('hits', 'asc', 'Less Clicked')" href="#">Less Clicked</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'asc', 'Category increasing')" href="#">Category increasing</a></li>
+										<li><a v-on:click.prevent="setUrlSorting('ctgry', 'desc', 'Category decreasing')" href="#">Category decreasing</a></li>
 									</ul>
 								</div>
 							</div>
@@ -98,7 +98,7 @@
 							<div class="col-md-3">
 								<div class="checkbox">
 									<label>
-										<input id="showDeleted" type="checkbox"> Show Deleted
+										<input id="showDeleted" v-model="urlFilterData.del" @click="showDeleted" type="checkbox"> Show Deleted
 									</label>
 								</div>
 							</div>
