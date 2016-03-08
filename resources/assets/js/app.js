@@ -28,7 +28,7 @@ new Vue({
     methods:{
         deleteUrl: function(id){
             this.$http.get('/url/'+id+'/delete').then(function(res){
-                window.location.href="http://localhost:8000/";
+                window.location.href="/";
             });
         },
         showDeleted: function(){
@@ -54,7 +54,7 @@ new Vue({
             this.$http.post('url', this.formData).then(function(data){
                     console.log(data.data.data);
             });
-            window.location.href="http://localhost:8000/";
+            window.location.href="/";
             return false;
         },
         searchUrl: function(){
@@ -99,7 +99,6 @@ new Vue({
                 query.push('del=1');
             }
             query = a+query.join('&');
-            console.log(urlLink+query);
             this.$http.get(urlLink+query).then(function(res){
                 this.urls = res.data.data.data;
                 delete(res.data.data["data"]);

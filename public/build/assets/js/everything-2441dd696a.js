@@ -9739,7 +9739,7 @@ new Vue({
     methods:{
         deleteUrl: function(id){
             this.$http.get('/url/'+id+'/delete').then(function(res){
-                window.location.href="http://localhost:8000/";
+                window.location.href="/";
             });
         },
         showDeleted: function(){
