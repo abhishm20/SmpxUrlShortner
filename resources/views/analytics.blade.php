@@ -17,7 +17,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading text-center stats-panel-header">Analytics of Short Urls</div>
                     <div class="panel-body" id="analyticsPanel">
-                        <div id="clickPanel">
+                        <div>
                             <div class="btn-group btn-group-sm pull-right" role="group" aria-label="...">
                                 <button type="button" onclick="return changeUnit('year')" class="btn btn-info">Year</button>
                                 <button type="button" onclick="return changeUnit('month')" class="btn btn-info">Month</button>
@@ -33,10 +33,9 @@
                                     <span></span> <b class="caret"></b>
                                 </div>
                             </div>
-                            <div class="row">
-
-                            </div>
-
+                        </div>
+                        <hr>
+                        <div class="container">
                             <div class="row">
                                 <div class="col-md-12">
                                     <div id="clickGraph" style="height: 300px; width: 100%;"></div>

@@ -187,7 +187,7 @@ class UrlController extends Controller
 	*/
 	public function create(Request $request){
 		//	Get the largest Id of url from db
-		$maxId = Url::max('id');
+		$maxId = Url::withTrashed()->max('id');
 
 		//	Validate maxId, and fix it
 		if(!isset($maxId)){
