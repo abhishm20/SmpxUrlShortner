@@ -33,13 +33,11 @@ use Illuminate\Http\Request;
  Route::get('/urls/categories', 'UrlController@getCategories');
 
 
- // Returns the all soft-deleted Urls, with pagination
- //Route::get('/urls/deleted/{paginateCount}', 'UrlController@getPaginateDeleted');
-
-
  // Delete (Soft-Delete) the specified url by id
  Route::get('/url/{id}/delete', 'UrlController@softDelete');
 
+ // Return Click analytics Data of an url
+ Route::get('/url/{id}/analytics/click', 'UrlController@getClickAnalytics');
 
  // Returns the total Url data comes within the specified range, with pagination
  Route::get('/urls/{paginateCount}', 'UrlController@getPaginateUrls');
@@ -49,13 +47,14 @@ use Illuminate\Http\Request;
  Route::delete('/url/{id}', 'UrlController@softDelete');
 
 
+ // get url data of given id
+ Route::get('/url/{id}', 'UrlController@getUrl');
+
  // Redirect to original Site
  Route::get('/{shortUrl}', 'UrlController@redirect');
 
 
 
- //
- // Route::get('/urls/{id}/analytics/clicks/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@clickAnalytics');
  // Route::get('/urls/{id}/analytics/platform/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@platformAnalytics');
  //  Route::get('/urls/{id}/analytics/referrer/{rangeFrom}/{rangeTo}/{unit}', 'UrlController@referrerAnalytics');
 

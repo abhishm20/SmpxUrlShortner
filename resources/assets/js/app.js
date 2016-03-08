@@ -78,7 +78,8 @@ new Vue({
                 this.categories = (res.data.data);
             });
         },
-        getUrls: function(urlLink = Constants.defaultUrl){
+        getUrls: function(urlLink){
+            if(!urlLink) urlLink = Constants.defaultUrl;
             var query = [];
             var a = '';
             if(urlLink.indexOf('?') >= 0){

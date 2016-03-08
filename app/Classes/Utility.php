@@ -214,19 +214,19 @@ class Utility{
     public static function getUnit($unit){
         $GLOBALS['filter'] = 'D';
         if(!empty($unit)){
-            if($unit == 'date'){
+            if($unit == 'dt'){
                 $GLOBALS['filter'] = 'd';
-            }else if($unit == 'month'){
+            }else if($unit == 'mnth'){
                 $GLOBALS['filter'] = 'M';
-            }else if($unit == 'week'){
+            }else if($unit == 'wk'){
                 $GLOBALS['filter'] = 'D';
-            }else if($unit == 'year'){
+            }else if($unit == 'yr'){
                 $GLOBALS['filter'] = 'Y';
-            }else if($unit == 'hour'){
+            }else if($unit == 'hr'){
                 $GLOBALS['filter'] = 'h';
-            }else if($unit == 'minute'){
+            }else if($unit == 'min'){
                 $GLOBALS['filter'] = 'i';
-            }else if($unit == 'second'){
+            }else if($unit == 'sc'){
                 $GLOBALS['filter'] = 's';
             }else{
                 $GLOBALS['filter'] = 'M';

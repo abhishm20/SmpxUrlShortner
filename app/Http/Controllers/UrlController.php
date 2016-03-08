@@ -38,6 +38,38 @@ class UrlController extends Controller
 
 
 	/*
+	* Return single url data
+	*/
+	public function getUrl($id){
+		// validate the paginateCount
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		// Query Url by id from DB
+		$url = Url::find($id);
+
+		//	validate queried url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		// Build response object
+		$res = new \stdClass();
+		$res->status = 'Success';
+		$res->data = $url;
+		$res->message = 'Successfully Deleted';
+		return response()->json($res, 200);
+
+
+		//	Send response Object as json string
+		return response()->json($res, 200);
+	}
+
+
+	/*
 	* Return all categories and their counts
 	*/
 	public function getCategories(){
@@ -58,6 +90,12 @@ class UrlController extends Controller
 	* Return limited urls range $from with $length
 	*/
 	public function getPaginateUrls($paginateCount){
+		// validate the paginateCount
+		if(!preg_match('/^[1-9][0-9]*$/', $paginateCount)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid pagination');
+			return response()->json($error, 400);
+		}
+
 		//	sorting query parameter
 		$givenSortCol = Input::get('sort');
 		$givenSortDesc = Input::get('desc');
@@ -377,6 +415,101 @@ class UrlController extends Controller
 	}
 
 
+	/**
+	* Returns the url Clicks analytics data
+	*/
+	public function getClickAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
+			return response()->json($error, 400);
+		}
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		//	Pull Click Session Count lies within a time range from DB
+		$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->distinct('session_id')->count('session_id');
+
+		//	Pull Click Cookie Count lies within a time range from DB
+		$clickCookieCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->distinct('cookie_id')->count('cookie_id');
+
+		//	Pull Click Total Count lies within a time range from DB
+		$clickTotalCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->count('id');
+
+
+		//
+		$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('created_at, session_id'))->get()
+		->groupBy(function($date) {
+			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		});
+
+		$clickUserData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('created_at, cookie_id'))->get()
+		->groupBy(function($date) {
+			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		});
+
+		$clickTotalData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('created_at'))->get()
+		->groupBy(function($date) {
+			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		});
+		$clickResult = array(array());
+		$clickSessionResult = array();
+		$clickUserResult = array();
+		$clickTotalResult = array();
+		foreach ($clickSessionData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['session_id'];
+			}
+			$countElement = count(array_unique($distinctArray));
+			$clickResult[$key]['session'] = $countElement;
+		}
+
+		foreach ($clickUserData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['cookie_id'];
+			}
+			$countElement = count(array_unique($distinctArray));
+			$clickResult[$key]['user'] = $countElement;
+		}
+
+		foreach ($clickTotalData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['cookie_id'];
+			}
+			$countElement = count(($distinctArray));
+			$clickResult[$key]['total'] = $countElement;
+		}
+		$clickResult['sessionCount'] = $clickSessionCount;
+		$clickResult['cookieCount'] = $clickCookieCount;
+		$clickResult['totalCount'] = $clickTotalCount;
+		unset($clickResult[0]);
+		echo json_encode($clickResult);
+		return;
+	}
 
 /*
 * Return urls from a specific category
@@ -441,80 +574,7 @@ public function index(Request $request){
 }
 
 
-/**
-* Returns the url Clicks analytics data
-*/
-public function clickAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
 
-	$url = Url::find($id);
-	if(empty($url)){
-		echo 'Not Found';
-		return;
-	}
-	Utility::getUnit($unit);
-
-	$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->distinct('session_id')->count('session_id');
-	$clickCookieCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->distinct('session_id')->count('cookie_id');
-	$clickTotalCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->count('id');
-
-	$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('created_at, session_id'))->get()
-	->groupBy(function($date) {
-		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-	// echo json_encode($clickSessionData);
-	// return;
-	$clickUserData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('created_at, cookie_id'))->get()
-	->groupBy(function($date) {
-		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-
-	$clickTotalData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('created_at'))->get()
-	->groupBy(function($date) {
-		return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
-	});
-	$clickResult = array(array());
-	$clickSessionResult = array();
-	$clickUserResult = array();
-	$clickTotalResult = array();
-	foreach ($clickSessionData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['session_id'];
-		}
-		$countElement = count(array_unique($distinctArray));
-		$clickResult[$key]['session'] = $countElement;
-	}
-
-	foreach ($clickUserData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['cookie_id'];
-		}
-		$countElement = count(array_unique($distinctArray));
-		$clickResult[$key]['user'] = $countElement;
-	}
-
-	foreach ($clickTotalData as $key => $value) {
-		$distinctArray = array();
-		foreach ($value as $valueKey => $valueValue) {
-			$distinctArray[] = $valueValue['cookie_id'];
-		}
-		$countElement = count(($distinctArray));
-		$clickResult[$key]['total'] = $countElement;
-	}
-	$clickResult['sessionCount'] = $clickSessionCount;
-	$clickResult['cookieCount'] = $clickCookieCount;
-	$clickResult['totalCount'] = $clickTotalCount;
-	unset($clickResult[0]);
-	echo json_encode($clickResult);
-	return;
-}
 
 /**
 * Returns the url Platform analytics data

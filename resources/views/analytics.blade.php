@@ -17,25 +17,24 @@
                 <div class="panel panel-default">
                     <div class="panel-heading text-center stats-panel-header">Analytics of Short Urls</div>
                     <div class="panel-body" id="analyticsPanel">
-                        <div>
-                            <div class="btn-group btn-group-sm pull-right" role="group" aria-label="...">
-                                <button type="button" onclick="return changeUnit('year')" class="btn btn-info">Year</button>
-                                <button type="button" onclick="return changeUnit('month')" class="btn btn-info">Month</button>
-                                <button type="button" onclick="return changeUnit('week')" class="btn btn-info">Week</button>
-                                <button type="button" onclick="return changeUnit('date')" class="btn btn-info">Date</button>
-                                <button type="button" onclick="return changeUnit('hour')" class="btn btn-info">Hour</button>
-                                <button type="button" onclick="return changeUnit('minute')" class="btn btn-info">Minute</button>
-                                <button type="button" onclick="return changeUnit('second')" class="btn btn-info">Second</button>
+                        <div class="container-fluid">
+                            <div class="btn-group btn-group-sm pull-left" role="group" aria-label="...">
+                                <button type="button" @click="changeUnit('yr')" class="btn btn-default">Year</button>
+                                <button type="button" @click="changeUnit('mnth')" class="btn btn-default">Month</button>
+                                <button type="button" @click="changeUnit('wk')" class="btn btn-default">Week</button>
+                                <button type="button" @click="changeUnit('dt')" class="btn btn-default">Date</button>
+                                <button type="button" @click="changeUnit('hr')" class="btn btn-default">Hour</button>
+                                <button type="button" @click="changeUnit('min')" class="btn btn-default">Minute</button>
+                                <button type="button" @click="changeUnit('sc')" class="btn btn-default">Second</button>
                             </div>
-                            <div class="pull-left">
+                            <div class="pull-right">
                                 <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
                                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
                                     <span></span> <b class="caret"></b>
                                 </div>
                             </div>
                         </div>
-                        <hr>
-                        <div class="container">
+                        <div class="container-fluid container-main">
                             <div class="row">
                                 <div class="col-md-12">
                                     <div id="clickGraph" style="height: 300px; width: 100%;"></div>

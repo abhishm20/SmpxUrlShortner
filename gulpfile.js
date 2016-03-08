@@ -41,13 +41,13 @@ var elixir = require('laravel-elixir');
      mix.scripts([
          "jquery.min.js",
          "bootstrap.min.js",
-         "vue.js",
-         "vue-resource.min.js",
          "moment.min.js",
          "daterangepicker.min.js",
          "canvasjs.min.js",
          "jquery.vmap.min.js",
          "jquery.vmap.world.js",
+         "vue.js",
+         "vue-resource.min.js",
          "analytics.js"
      ], 'public/assets/js/analytics.js');
 
