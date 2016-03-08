@@ -9765,7 +9765,7 @@ new Vue({
             this.$http.post('url', this.formData).then(function(data){
                     console.log(data.data.data);
             });
-            window.location.href="http://localhost:8000/";
+            window.location.href="/";
             return false;
         },
         searchUrl: function(){
@@ -9810,7 +9810,6 @@ new Vue({
                 query.push('del=1');
             }
             query = a+query.join('&');
-            console.log(urlLink+query);
             this.$http.get(urlLink+query).then(function(res){
                 this.urls = res.data.data.data;
                 delete(res.data.data["data"]);
@@ -9824,8 +9823,7 @@ new Vue({
             this.getUrls(this.urlData.prev_page_url);
         }
     },
-
-    ready: function(){
+    created: function(){
         this.getCategoryList();
         this.getUrls();
     }

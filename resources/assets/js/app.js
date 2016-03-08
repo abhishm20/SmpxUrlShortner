@@ -112,8 +112,7 @@ new Vue({
             this.getUrls(this.urlData.prev_page_url);
         }
     },
-
-    ready: function(){
+    created: function(){
         this.getCategoryList();
         this.getUrls();
     }
