@@ -351,7 +351,7 @@ class UrlController extends Controller
 			$city = Utility::getCity($_SERVER["REMOTE_ADDR"]);
 			$state = Utility::getState($_SERVER["REMOTE_ADDR"]);
 			$country = Utility::getCountry($_SERVER["REMOTE_ADDR"]);
-			$countryIsoCode = Utility::getCountryIsoCode($_SERVER["REMOTE_ADDR"]);
+			$countryIsoCode = strtolower(Utility::getCountryIsoCode($_SERVER["REMOTE_ADDR"]));
 		}catch(AddressNotFoundException $e){
 			// Make logging for AddressNotFoundException exception
 			//Utility::log($e);

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'ipdb' => env('IP_DB', '/home/abhishek/GeoIp/GeoLite2-City.mmdb'),
+    'ipdb' => env('IP_DB', '/home/brainbox/GeoIp/GeoLite2-City.mmdb'),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => 'http://localhost:8000',
+    'url' => 'http://brainboxapp.com:8000',
 
     /*
     |--------------------------------------------------------------------------
