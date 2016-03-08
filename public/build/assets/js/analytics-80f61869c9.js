@@ -11761,7 +11761,7 @@ var Constants = {
 }
 
 
-var sample_data = {"af":"16.63","IN":"12"};
+var sample_data = {"af":"16.63","in":"12"};
 var countryGraph = {
     map: 'world_en',
     backgroundColor: '#fff',
@@ -11939,10 +11939,9 @@ new Vue({
             });
         },
         getCountryAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
-                this.countryData = res.data.data;
-                console.log(this.countryData);
-                //countryGraph.values = this.countryData;
+            this.$http.get('url/'+this.queryId+'/analytics/country?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+                this.countryData = res.data;
+                countryGraph.values = this.countryData.data;
                 $('#countryGraph').vectorMap(countryGraph);
             });
         },
@@ -11961,7 +11960,7 @@ new Vue({
                 console.log('time: '+self.filterData.f);
                 self.drawGraphs();
             }
-            cb(moment().subtract(1, 'days'), moment().endOf('day'));
+            cb(moment().startOf('month'), moment().endOf('month'));
 
             $('#reportrange').daterangepicker({
                 timePicker: true,

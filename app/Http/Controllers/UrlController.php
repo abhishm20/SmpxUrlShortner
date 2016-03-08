@@ -631,15 +631,21 @@ class UrlController extends Controller
 		//	Handle the given unit and pick the right one unit for fetching data from DB
 		Utility::getUnit($unit);
 
-		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-		->select(\DB::raw('count(*) as count, country_iso_code, country'))
+		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+		->select(\DB::raw('count(*) as count, country_iso_code'))
 		->groupBy('country_iso_code')
 		->get();
+
+		//response data
+		$resultData = array();
+		foreach ($countryData as $key => $value) {
+			$resultData[$value['country_iso_code']] = $value['count'];
+		}
 
 		//	Build response object
 		$res = new \stdClass();
 		$res->status = "Success";
-		$res->data = $countryData;
+		$res->data = $resultData;
 		return response()->json($res, 200);
 
 	}
