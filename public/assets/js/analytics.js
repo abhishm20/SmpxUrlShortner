@@ -11780,12 +11780,14 @@ var countryGraph = {
 };
 
 var clickGraph = new CanvasJS.Chart("clickGraph",{
-    theme:"theme2",
+    theme:"theme1",
     title:{
         text: "Click Analysis",
         fontSize: 20
     },
     animationEnabled: true,
+    exportEnabled: true,
+    exportFileName: "Click Graph",
     toolTip: {
         shared: "true"
     },
@@ -11833,6 +11835,8 @@ var osGraph = new CanvasJS.Chart("osGraph", {
         fontSize: 20
     },
     animationEnabled: true,
+    exportEnabled: true,
+    exportFileName: "OS Graph",
     axisX:{
         interval: 1,
         gridThickness: 0,
@@ -11865,6 +11869,8 @@ var referrerGraph = new CanvasJS.Chart("referrerGraph", {
         fontSize: 20
     },
     animationEnabled: true,
+    exportEnabled: true,
+    exportFileName: "Referrer Graph",
     axisX:{
         interval: 1,
         gridThickness: 0,
