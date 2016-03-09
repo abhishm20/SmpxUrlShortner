@@ -113,8 +113,8 @@
 										<th>Short Url</th>
 										<th>Created</th>
 										<th>Category</th>
-										<th>Delete</th>
 										<th>Hits</th>
+										<th>Action</th>
 									</tr>
 								</thead>
 								<tbody >
@@ -124,8 +124,11 @@
 										<td><a target='_blank' href="@{{url.short_url}}">@{{url.short_url}}</a></td>
 										<td>@{{url.time}}</td>
 										<td>@{{url.category}}</td>
-										<td><button type='button' v-on:click.prevent="deleteUrl(url.id)" class='btn btn-default btn-xs'>Delete</button></td>
-										<td><button type='button' v-on:click.prevent="analyse(url.id)" class='btn btn-default btn-xs'>@{{url.clicks}} analyse</button></td>
+										<td>@{{url.clicks}}</td>
+										<td>
+											<button type='button' v-on:click.prevent="deleteUrl(url.id)" v-bind:class="{ 'btn-danger': !urlFilterData.del, 'btn-success': urlFilterData.del }" class='btn btn-xs'>Delete</button>
+											<button type='button' v-on:click.prevent="analyse(url.id)" class='btn btn-info btn-xs'>analyse</button>
+										</td>
 									</tr>
 								</tbody>
 							</table>
