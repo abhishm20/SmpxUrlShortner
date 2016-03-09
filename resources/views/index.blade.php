@@ -120,7 +120,7 @@
 								<tbody >
 									<tr v-for="url in urls">
 										<td>@{{urlData.from + $index}}</td>
-										<td><a target='_blank' href="@{{url.long_url}}">@{{url.long_url}}</a></td>
+										<td><a target='_blank' href="@{{url.long_url}}">@{{url.long_url.split('?')[0]+"..."}}</a></td>
 										<td><a target='_blank' href="@{{url.short_url}}">@{{url.short_url}}</a></td>
 										<td>@{{url.time}}</td>
 										<td>@{{url.category}}</td>
