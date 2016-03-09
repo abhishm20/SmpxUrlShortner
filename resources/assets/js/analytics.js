@@ -224,10 +224,10 @@ var vm = new Vue({
             var self = this;
             function cb(start, end) {
                 $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-                self.filterData.f = start.format('YYYY-MM-DD hh:mm:ss');
-                self.filterData.t = end.format('YYYY-MM-DD hh:mm:ss');
-                console.log('time: '+self.filterData.f);
-                console.log('time: '+self.filterData.t);
+                self.filterData.f = start.format('YYYY-MM-DD HH:mm:ss');
+                self.filterData.t = end.format('YYYY-MM-DD HH:mm:ss');
+                console.log('from: '+self.filterData.f);
+                console.log('to: '+self.filterData.t);
                 self.drawGraphs();
             }
             cb(moment().startOf('month'), moment().endOf('month'));
@@ -236,13 +236,13 @@ var vm = new Vue({
                 timePicker: true,
                 timePickerIncrement: 10,
                 locale: {
-                    format: 'MM/DD/YYYY h:mm A'
+                    format: 'MM/DD/YYYY HH:mm A'
                 },
                 ranges: {
-                    'Today': [moment().subtract(1, 'days'), moment().endOf('day')],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'Today': [moment().startOf('day'), moment().endOf('day')],
+                    'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                    'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days').startOf('day'), moment()],
                     'This Month': [moment().startOf('month'), moment().endOf('month')],
                     'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                 }

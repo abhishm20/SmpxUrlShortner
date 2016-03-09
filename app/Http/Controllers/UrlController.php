@@ -515,8 +515,8 @@ class UrlController extends Controller
 		$emptyObject->user = 0;
 		$emptyObject->total = 0;
 
-		$startTime = Carbon::createFromFormat('yy-m-d h:i:s', $rangeFrom);
-		$endTime = Carbon::createFromFormat('yy-m-d h:i:s', $rangeTo);
+		$startTime = Carbon::createFromFormat('yy-m-d H:i:s', $rangeFrom);
+		$endTime = Carbon::createFromFormat('yy-m-d H:i:s', $rangeTo);
 
 		//	Counter for Second unit, Which limit to certain no of data
 		$secCounterLimit = config('app.secCounterLimit');

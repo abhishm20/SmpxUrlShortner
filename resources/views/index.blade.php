@@ -126,7 +126,8 @@
 										<td>@{{url.category}}</td>
 										<td>@{{url.clicks}}</td>
 										<td>
-											<button type='button' v-on:click.prevent="deleteUrl(url.id)" v-bind:class="{ 'btn-danger': !urlFilterData.del, 'btn-success': urlFilterData.del }" class='btn btn-xs'>Delete</button>
+											<button v-if="!urlFilterData.del" type='button' v-on:click.prevent="deleteUrl(url.id)" class='btn btn-danger btn-xs'>Delete</button>
+											<button v-if="urlFilterData.del" type='button' v-on:click.prevent="recoverUrl(url.id)" class='btn btn-success btn-xs'>Recover</button>
 											<button type='button' v-on:click.prevent="analyse(url.id)" class='btn btn-info btn-xs'>analyse</button>
 										</td>
 									</tr>
