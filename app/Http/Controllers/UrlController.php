@@ -52,8 +52,8 @@ class UrlController extends Controller
 
 		//	validate queried url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		// Build response object
@@ -203,8 +203,8 @@ class UrlController extends Controller
 
 		//	validate queried url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		$url->delete($id);
@@ -216,6 +216,35 @@ class UrlController extends Controller
 		$res->message = 'Successfully Deleted';
 		return response()->json($res, 200);
 	}
+
+
+	/*
+	* Recover url from Soft Delete
+	*/
+	public function recoverUrl($id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		// Query Url by id from DB
+		$url = Url::onlyTrashed()->where('id', $id)->restore();
+
+		//	validate queried url
+		if($url == 0){
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
+		}
+
+		// Build response object
+		$res = new \stdClass();
+		$res->status = 'Success';
+		$res->data = $url;
+		$res->message = 'Successfully Recoverd';
+		return response()->json($res, 200);
+	}
+
 
 
 	/**
@@ -310,8 +339,8 @@ class UrlController extends Controller
 
 		//	Check whether Url object exists
 		if(!$urls->first()){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		// get the queried url from collection
@@ -436,8 +465,8 @@ class UrlController extends Controller
 
 		// Validate Fetch Url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 
@@ -614,8 +643,8 @@ class UrlController extends Controller
 
 		// Validate Fetch Url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
@@ -652,8 +681,8 @@ class UrlController extends Controller
 
 		// Validate Fetch Url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		//	Handle the given unit and pick the right one unit for fetching data from DB
@@ -694,8 +723,8 @@ class UrlController extends Controller
 
 		// Validate Fetch Url
 		if(empty($url)){
-			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
-			return response()->json($error, 400);
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
 		}
 
 		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')

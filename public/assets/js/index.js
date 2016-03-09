@@ -9743,6 +9743,15 @@ new Vue({
                 '_blank' // <- This is what makes it open in a new window.
             );
         },
+        recoverUrl: function(id){
+            this.$http.get('url/'+id+'/recover').then(function(res){
+                alert((res.data.message));
+                window.location.href="/";
+                return false;
+            }, function(res){
+                console.log(res);
+            });
+        },
         deleteUrl: function(id){
             this.$http.get('/url/'+id+'/delete').then(function(res){
                 window.location.href="/";

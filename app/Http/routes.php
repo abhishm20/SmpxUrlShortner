@@ -41,7 +41,8 @@ use Illuminate\Http\Request;
  // Delete (Soft-Delete) the specified url by id
  Route::get('/url/{id}/delete', 'UrlController@softDelete');
 
-
+ // Delete (Soft-Delete) the specified url by id
+ Route::get('/url/{id}/recover', 'UrlController@recoverUrl');
 
  // Return Click analytics Data of an url
  Route::get('/url/{id}/analytics/click', 'UrlController@getClickAnalytics');
