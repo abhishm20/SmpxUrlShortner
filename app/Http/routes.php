@@ -20,6 +20,14 @@ use Illuminate\Http\Request;
    return view('analytics');
  });
 
+ Route::get('/demo', function(Request $request){
+     $time = time();
+
+    //echo date_default_timezone_get();
+     echo date('c');
+     return;
+ });
+
 
  // create New Url and return the saved url data
  Route::post('/url', 'UrlController@create');
@@ -78,11 +86,6 @@ use Illuminate\Http\Request;
  });
 
 
-  Route::get('/demo', function(Request $request){
-      $time = time();
-      echo Utility::getReadableTime($time);
-      return;
-  });
 
   Route::get('/generate/{count}', function($count){
   	$hashids = new Hashids('smpx', 6);

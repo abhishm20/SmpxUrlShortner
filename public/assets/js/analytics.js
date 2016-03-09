@@ -11827,46 +11827,69 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
 
     }
 });
-var platformGraph = new CanvasJS.Chart("platformGraph",{
+var osGraph = new CanvasJS.Chart("osGraph", {
     title:{
-        text: "Platform Analysis",
-        verticalAlign: 'top',
-        horizontalAlign: 'left',
+        text:"OS Graph",
         fontSize: 20
     },
     animationEnabled: true,
+    axisX:{
+        interval: 1,
+        gridThickness: 0,
+        labelFontSize: 10,
+        labelFontStyle: "normal",
+        labelFontWeight: "normal",
+        labelFontFamily: "Lucida Sans Unicode"
+
+    },
+    axisY2:{
+        interlacedColor: "rgba(1,77,101,.2)",
+        gridColor: "rgba(1,77,101,.1)"
+
+    },
     data: [
         {
-            type: "doughnut",
-            startAngle:20,
-            toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
-            indexLabel: "{label}: {y}",
-            dataPoints: [
-            ]
+            type: "bar",
+            name: "companies",
+            axisYType: "secondary",
+            color: "#014D65",
+            dataPoints: []
         }
+
     ]
 });
 
-var referrerGraph = new CanvasJS.Chart("referrerGraph",{
+var referrerGraph = new CanvasJS.Chart("referrerGraph", {
     title:{
-        text: "Referrer Analysis",
-        verticalAlign: 'top',
-        horizontalAlign: 'left',
+        text:"Referrer Graph",
         fontSize: 20
     },
     animationEnabled: true,
+    axisX:{
+        interval: 1,
+        gridThickness: 0,
+        labelFontSize: 10,
+        labelFontStyle: "normal",
+        labelFontWeight: "normal",
+        labelFontFamily: "Lucida Sans Unicode"
+
+    },
+    axisY2:{
+        interlacedColor: "rgba(1,77,101,.2)",
+        gridColor: "rgba(1,77,101,.1)"
+
+    },
     data: [
         {
-            type: "doughnut",
-            startAngle:20,
-            toolTipContent: "{label}: {y} - <strong>#percent%</strong>",
-            indexLabel: "{label}: {y}",
-            dataPoints: [
-            ]
+            type: "bar",
+            name: "companies",
+            axisYType: "secondary",
+            color: "#014D65",
+            dataPoints: []
         }
+
     ]
 });
-
 
 var vm = new Vue({
     el: '#app',
@@ -11879,7 +11902,7 @@ var vm = new Vue({
         },
         clickData: {},
         countryData: {},
-        platformData: {},
+        osData: {},
         referrerData: {},
         currentUrl: {}
     },
@@ -11917,16 +11940,18 @@ var vm = new Vue({
                     clickGraph.options.data[2].dataPoints.push({label: xValue, y : this.clickData[xValue]['session']});
                 }
                 clickGraph.render();
+            }, function (res) {
+                if(res.status != 200) alert(res.data.message);return;
             });
         },
-        getPlatformAnalytics: function(){
+        getOsAnalytics: function(){
             this.$http.get('url/'+this.queryId+'/analytics/platform?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
-                this.platformData = res.data.data;
-                platformGraph.options.data[0].dataPoints = [];
-                for (pf of this.platformData) {
-                    platformGraph.options.data[0].dataPoints.push({y : pf['count'], label: pf['platform']});
+                this.osData = res.data.data;
+                osGraph.options.data[0].dataPoints = [];
+                for (pf of this.osData) {
+                    osGraph.options.data[0].dataPoints.push({y : parseInt(pf['count']), label: pf['platform']});
                 }
-                platformGraph.render();
+                osGraph.render();
             });
         },
         getReferrerAnalytics: function(){
@@ -11934,7 +11959,7 @@ var vm = new Vue({
                 this.referrerData = res.data.data;
                 referrerGraph.options.data[0].dataPoints = [];
                 for (referrer of this.referrerData) {
-                    referrerGraph.options.data[0].dataPoints.push({label: referrer['referrers'], y : referrer['count']});
+                    referrerGraph.options.data[0].dataPoints.push({label: referrer['referrers'], y : parseInt(referrer['count'])});
                 }
                 referrerGraph.render();
             });
@@ -11949,7 +11974,7 @@ var vm = new Vue({
         },
         drawGraphs: function(){
             this.getClickAnalytics();
-            this.getPlatformAnalytics();
+            this.getOsAnalytics();
             this.getReferrerAnalytics();
             this.getCountryAnalytics();
         },
@@ -11960,6 +11985,7 @@ var vm = new Vue({
                 self.filterData.f = start.format('YYYY-MM-DD hh:mm:ss');
                 self.filterData.t = end.format('YYYY-MM-DD hh:mm:ss');
                 console.log('time: '+self.filterData.f);
+                console.log('time: '+self.filterData.t);
                 self.drawGraphs();
             }
             cb(moment().startOf('month'), moment().endOf('month'));

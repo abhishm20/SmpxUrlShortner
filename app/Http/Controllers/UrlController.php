@@ -429,6 +429,7 @@ class UrlController extends Controller
 		$rangeFrom = Input::get('f');
 		$unit = Input::get('u');
 
+		Utility::getUnit($unit);
 
 		//	Fetch Url instance from DB
 		$url = Url::find($id);
@@ -439,8 +440,6 @@ class UrlController extends Controller
 			return response()->json($error, 400);
 		}
 
-		//	Handle the given unit and pick the right one unit for fetching data from DB
-		Utility::getUnit($unit);
 
 		//	Pull Click Session Count lies within a time range from DB
 		$clickSessionCount= $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
@@ -458,20 +457,23 @@ class UrlController extends Controller
 		//	fetch click session, total, cookie data
 		$clickSessionData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 		->select(\DB::raw('created_at, session_id'))->get()
-		->groupBy(function($date) {
-			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+		->groupBy(function($date){
+			return Carbon::parse($date->created_at)->format($GLOBALS['unit']);
 		});
+
+		//$c = Utility::formatClickData($clickSessionData, $unit);
+		//echo json_encode($clickSessionData);return;
 
 		$clickUserData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 		->select(\DB::raw('created_at, cookie_id'))->get()
 		->groupBy(function($date) {
-			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+			return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
 		});
 
 		$clickTotalData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 		->select(\DB::raw('created_at'))->get()
 		->groupBy(function($date) {
-			return Carbon::parse($date->created_at)->format($GLOBALS['filter']); // grouping by years
+			return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
 		});
 
 		//	Final result object
@@ -507,10 +509,81 @@ class UrlController extends Controller
 			$countElement = count(($distinctArray));
 			$clickResult[$key]['total'] = $countElement;
 		}
+
+		$emptyObject = new \stdClass();
+		$emptyObject->session = 0;
+		$emptyObject->user = 0;
+		$emptyObject->total = 0;
+
+		$startTime = Carbon::createFromFormat('yy-m-d h:i:s', $rangeFrom);
+		$endTime = Carbon::createFromFormat('yy-m-d h:i:s', $rangeTo);
+
+		//	Counter for Second unit, Which limit to certain no of data
+		$secCounterLimit = config('app.secCounterLimit');
+		$secCounter = 0;
+
+		while($startTime <= $endTime){
+			$iniTimeStr = $startTime->format($GLOBALS['unit']);
+			if(!array_key_exists($iniTimeStr, $clickResult)){
+				$clickResult[$iniTimeStr] = $emptyObject;
+			}
+			switch ($unit) {
+				case 'sec':
+					$startTime = $startTime->addSecond();
+					$secCounter++;
+					if($secCounter == $secCounterLimit){
+						$error = Utility::getError(null, 400, "Error", "Range is to High for Second, Please minimize your range");
+						return response()->json($error, 400);
+					}
+					break;
+				case 'min':
+					$startTime = $startTime->addMinute();
+					$secCounter++;
+					if($secCounter == $secCounterLimit){
+						$error = Utility::getError(null, 400, "Error", "Range is to High for Minute, Please minimize your range");
+						return response()->json($error, 400);
+					}
+					break;
+				case 'hr':
+					$startTime = $startTime->addHour();
+					$secCounter++;
+					if($secCounter == $secCounterLimit){
+						$error = Utility::getError(null, 400, "Error", "Range is to High for Hour, Please minimize your range");
+						return response()->json($error, 400);
+					}
+					break;
+				case 'dt':
+					$startTime = $startTime->addDay();
+					$secCounter++;
+					if($secCounter == $secCounterLimit){
+						$error = Utility::getError(null, 400, "Error", "Range is to High for Day, Please minimize your range");
+						return response()->json($error, 400);
+					}
+					break;
+				case 'wk':
+					$startTime = $startTime->addWeek();
+					break;
+				case 'mnth':
+					$startTime = $startTime->addMonth();
+					break;
+				case 'yr':
+					$startTime = $startTime->addYear();
+					break;
+				default:
+					$startTime = $startTime->addDay();
+					break;
+			}
+		}
+
+		//remove 0 the element , it contains none
+		unset($clickResult[0]);
+
+		// Sort the time(Key)
+		uksort($clickResult, array('App\Classes\Utility', 'sortClickData'));
+
 		$clickResult['sessionCount'] = $clickSessionCount;
 		$clickResult['cookieCount'] = $clickCookieCount;
 		$clickResult['totalCount'] = $clickTotalCount;
-		unset($clickResult[0]);
 
 		//	Build response object
 		$res = new \stdClass();
@@ -544,9 +617,6 @@ class UrlController extends Controller
 			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
 			return response()->json($error, 400);
 		}
-
-		//	Handle the given unit and pick the right one unit for fetching data from DB
-		Utility::getUnit($unit);
 
 		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 		->select(\DB::raw('count(*) as count, platform'))
@@ -627,9 +697,6 @@ class UrlController extends Controller
 			$error = Utility::getError(null, 400, 'Error', 'Url Not Found');
 			return response()->json($error, 400);
 		}
-
-		//	Handle the given unit and pick the right one unit for fetching data from DB
-		Utility::getUnit($unit);
 
 		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
 		->select(\DB::raw('count(*) as count, country_iso_code'))

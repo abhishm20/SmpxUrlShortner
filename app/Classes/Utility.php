@@ -66,6 +66,12 @@ class Utility{
     );
 
 
+    public static function sortClickData($a, $b){
+        $at = Carbon::createFromFormat($GLOBALS['unit'], $a);
+		$bt = Carbon::createFromFormat($GLOBALS['unit'], $b);
+        if($at == $bt) return 0;
+        return ($at > $bt) ? 1 : -1;
+    }
 
     /*
     * Return city of an ip
@@ -212,26 +218,27 @@ class Utility{
     }
 
     public static function getUnit($unit){
-        $GLOBALS['filter'] = 'D';
+        $u = 'd-M-y';
         if(!empty($unit)){
             if($unit == 'dt'){
-                $GLOBALS['filter'] = 'd';
+                $u = 'd-M-y';
             }else if($unit == 'mnth'){
-                $GLOBALS['filter'] = 'M';
+                $u = 'M Y';
             }else if($unit == 'wk'){
-                $GLOBALS['filter'] = 'D';
+                $u = 'D d-m-y';
             }else if($unit == 'yr'){
-                $GLOBALS['filter'] = 'Y';
+                $u = 'Y';
             }else if($unit == 'hr'){
-                $GLOBALS['filter'] = 'h';
+                $u = 'hA d-M';
             }else if($unit == 'min'){
-                $GLOBALS['filter'] = 'i';
-            }else if($unit == 'sc'){
-                $GLOBALS['filter'] = 's';
+                $u = 'h:i A d-M';
+            }else if($unit == 'sec'){
+                $u = 'h:i:s A';
             }else{
-                $GLOBALS['filter'] = 'M';
+                $u = 'd-M-y';
             }
         }
+        $GLOBALS['unit'] = $u;
     }
 
     /*
