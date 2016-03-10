@@ -1106,24 +1106,15 @@ class UrlController extends Controller
 
 
 		if(!strcmp($category, 'all')){
-			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
-			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
 			->get();
 		}else{
-			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
-			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
 			->get();
-		}
-
-
-		//response data
-		$resultData = array();
-		foreach ($countryData as $key => $value) {
-			$resultData[$value['country_iso_code']] = $value['count'];
 		}
 
 		//	Build response object
