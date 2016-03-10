@@ -9737,6 +9737,23 @@ new Vue({
     },
 
     methods:{
+        analyseCategory: function(){
+            if(this.urlFilterData.category){
+                if (confirm("Analyse "+this.urlFilterData.category+" category Urls?") == true) {
+                    window.open(
+                        "/category/analytics?cat="+this.urlFilterData.category,
+                        '_blank' // <- This is what makes it open in a new window.
+                    );
+                }
+            }else{
+                if (confirm("Analyse All categories Urls?") == true) {
+                    window.open(
+                        "/category/analytics",
+                        '_blank' // <- This is what makes it open in a new window.
+                    );
+                }
+            }
+        },
         analyse: function(id){
             window.open(
                 "/analytics?id="+id,

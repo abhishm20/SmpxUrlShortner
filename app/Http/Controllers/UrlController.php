@@ -463,6 +463,7 @@ class UrlController extends Controller
 		//	Fetch Url instance from DB
 		$url = Url::find($id);
 
+
 		// Validate Fetch Url
 		if(empty($url)){
 			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
@@ -558,49 +559,49 @@ class UrlController extends Controller
 			}
 			switch ($unit) {
 				case 'sec':
-					$startTime = $startTime->addSecond();
-					$secCounter++;
-					if($secCounter == $secCounterLimit){
-						$error = Utility::getError(null, 400, "Error", "Range is to High for Second, Please minimize your range");
-						return response()->json($error, 400);
-					}
-					break;
+				$startTime = $startTime->addSecond();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Second, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
 				case 'min':
-					$startTime = $startTime->addMinute();
-					$secCounter++;
-					if($secCounter == $secCounterLimit){
-						$error = Utility::getError(null, 400, "Error", "Range is to High for Minute, Please minimize your range");
-						return response()->json($error, 400);
-					}
-					break;
+				$startTime = $startTime->addMinute();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Minute, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
 				case 'hr':
-					$startTime = $startTime->addHour();
-					$secCounter++;
-					if($secCounter == $secCounterLimit){
-						$error = Utility::getError(null, 400, "Error", "Range is to High for Hour, Please minimize your range");
-						return response()->json($error, 400);
-					}
-					break;
+				$startTime = $startTime->addHour();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Hour, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
 				case 'dt':
-					$startTime = $startTime->addDay();
-					$secCounter++;
-					if($secCounter == $secCounterLimit){
-						$error = Utility::getError(null, 400, "Error", "Range is to High for Day, Please minimize your range");
-						return response()->json($error, 400);
-					}
-					break;
+				$startTime = $startTime->addDay();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Day, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
 				case 'wk':
-					$startTime = $startTime->addWeek();
-					break;
+				$startTime = $startTime->addWeek();
+				break;
 				case 'mnth':
-					$startTime = $startTime->addMonth();
-					break;
+				$startTime = $startTime->addMonth();
+				break;
 				case 'yr':
-					$startTime = $startTime->addYear();
-					break;
+				$startTime = $startTime->addYear();
+				break;
 				default:
-					$startTime = $startTime->addDay();
-					break;
+				$startTime = $startTime->addDay();
+				break;
 			}
 		}
 
@@ -620,6 +621,206 @@ class UrlController extends Controller
 		$res->data = $clickResult;
 		return response()->json($res, 200);
 	}
+
+
+	/**
+	* Returns the url Clicks analytics data
+	*/
+	public function getCategoryClickAnalytics(Request $request, $category){
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		$unit = Input::get('u');
+
+		Utility::getUnit($unit);
+
+		if($category == 'all'){
+			$clickSessionCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo)) // Optional: downgrade to non-eloquent builder so we don't build invalid User objects.
+			->distinct('session_id')->count('hits.session_id');
+
+			$clickCookieCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->distinct('cookie_id')->count('hits.cookie_id');
+
+			$clickTotalCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->count('hits.id');
+
+			//	fetch click session, total, cookie data
+			$clickUserData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at, hits.cookie_id'))->get()
+			->groupBy(function($date) {
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
+			});
+
+			$clickSessionData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at, hits.session_id'))->get()
+			->groupBy(function($date){
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']);
+			});
+
+			$clickTotalData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at'))->get()
+			->groupBy(function($date) {
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
+			});
+		}else{
+			$clickSessionCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo)) // Optional: downgrade to non-eloquent builder so we don't build invalid User objects.
+			->distinct('session_id')->count('hits.session_id');
+
+			$clickCookieCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->distinct('cookie_id')->count('hits.cookie_id');
+
+			$clickTotalCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->count('hits.id');
+
+			//	fetch click session, total, cookie data
+			$clickUserData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at, hits.cookie_id'))->get()
+			->groupBy(function($date) {
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
+			});
+
+			$clickSessionData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at, hits.session_id'))->get()
+			->groupBy(function($date){
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']);
+			});
+
+			$clickTotalData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('hits.created_at'))->get()
+			->groupBy(function($date) {
+				return Carbon::parse($date->created_at)->format($GLOBALS['unit']); // grouping by years
+			});
+		}
+
+
+
+		//	Final result object
+		$clickResult = array(array());
+		$clickSessionResult = array();
+		$clickUserResult = array();
+		$clickTotalResult = array();
+		//return response()->json($clickSessionData);
+		//	Count the fetch data and set final result
+		foreach ($clickSessionData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['session_id'];
+			}
+			$countElement = count(array_unique($distinctArray));
+			$clickResult[$key]['session'] = $countElement;
+		}
+
+		foreach ($clickUserData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['cookie_id'];
+			}
+			$countElement = count(array_unique($distinctArray));
+			$clickResult[$key]['user'] = $countElement;
+		}
+
+		foreach ($clickTotalData as $key => $value) {
+			$distinctArray = array();
+			foreach ($value as $valueKey => $valueValue) {
+				$distinctArray[] = $valueValue['cookie_id'];
+			}
+			$countElement = count(($distinctArray));
+			$clickResult[$key]['total'] = $countElement;
+		}
+
+		$emptyObject = new \stdClass();
+		$emptyObject->session = 0;
+		$emptyObject->user = 0;
+		$emptyObject->total = 0;
+
+		$startTime = Carbon::createFromFormat('yy-m-d H:i:s', $rangeFrom);
+		$endTime = Carbon::createFromFormat('yy-m-d H:i:s', $rangeTo);
+
+		//	Counter for Second unit, Which limit to certain no of data
+		$secCounterLimit = config('app.secCounterLimit');
+		$secCounter = 0;
+
+		while($startTime <= $endTime){
+			$iniTimeStr = $startTime->format($GLOBALS['unit']);
+			if(!array_key_exists($iniTimeStr, $clickResult)){
+				$clickResult[$iniTimeStr] = $emptyObject;
+			}
+			switch ($unit) {
+				case 'sec':
+				$startTime = $startTime->addSecond();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Second, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
+				case 'min':
+				$startTime = $startTime->addMinute();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Minute, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
+				case 'hr':
+				$startTime = $startTime->addHour();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Hour, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
+				case 'dt':
+				$startTime = $startTime->addDay();
+				$secCounter++;
+				if($secCounter == $secCounterLimit){
+					$error = Utility::getError(null, 400, "Error", "Range is to High for Day, Please minimize your range");
+					return response()->json($error, 400);
+				}
+				break;
+				case 'wk':
+				$startTime = $startTime->addWeek();
+				break;
+				case 'mnth':
+				$startTime = $startTime->addMonth();
+				break;
+				case 'yr':
+				$startTime = $startTime->addYear();
+				break;
+				default:
+				$startTime = $startTime->addDay();
+				break;
+			}
+		}
+
+		//remove 0 the element , it contains none
+		unset($clickResult[0]);
+
+		// Sort the time(Key)
+		uksort($clickResult, array('App\Classes\Utility', 'sortClickData'));
+
+		$clickResult['sessionCount'] = $clickSessionCount;
+		$clickResult['cookieCount'] = $clickCookieCount;
+		$clickResult['totalCount'] = $clickTotalCount;
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $clickResult;
+		return response()->json($res, 200);
+	}
+
 
 
 	/**
@@ -747,6 +948,117 @@ class UrlController extends Controller
 	}
 
 
+	/**
+	* Returns the url Platform analytics data
+	*/
+	public function getCategoryPlatformAnalytics(Request $request, $category){
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+		if($category == 'all'){
+			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('count(*) as count, platform'))
+			->groupBy('platform')
+			->get();
+		}else{
+			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('count(*) as count, platform'))
+			->groupBy('platform')
+			->get();
+		}
+
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $platformData;
+		return response()->json($res, 200);
+	}
+
+
+	/**
+	* Returns the url Referrer analytics data
+	*/
+	public function getCategoryReferrerAnalytics(Request $request, $category){
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		if($category == 'all'){
+			$referrerData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('count(*) as count, referrers'))
+			->groupBy('referrers')
+			->get();
+		}else{
+			$referrerData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
+			->select(\DB::raw('count(*) as count, referrers'))
+			->groupBy('referrers')
+			->get();
+		}
+
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $referrerData;
+		return response()->json($res, 200);
+
+	}
+
+
+	/**
+	* Returns the url Country analytics data
+	*/
+	public function getCategoryCountryAnalytics(Request $request, $category){
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		if($category == 'all'){
+			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			->select(\DB::raw('count(*) as count, country_iso_code'))
+			->groupBy('country_iso_code')
+			->get();
+		}else{
+			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			->select(\DB::raw('count(*) as count, country_iso_code'))
+			->groupBy('country_iso_code')
+			->get();
+		}
+
+
+		//response data
+		$resultData = array();
+		foreach ($countryData as $key => $value) {
+			$resultData[$value['country_iso_code']] = $value['count'];
+		}
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $resultData;
+		return response()->json($res, 200);
+
+	}
 
 
 
@@ -756,131 +1068,133 @@ class UrlController extends Controller
 
 
 
-/*
-* Return urls from a specific category
-*/
-public function getCotegoryUrls($name, $from, $to){
-	if(!$name){
-		echo "Invalid Name";
+
+
+	/*
+	* Return urls from a specific category
+	*/
+	public function getCotegoryUrls($name, $from, $to){
+		if(!$name){
+			echo "Invalid Name";
+			return;
+		}
+		$urls = Url::where('category', $name)->take($to)->skip($from)->get();
+		echo $urls->toJson();
+	}
+
+
+
+	/*
+	* Return urls count from a specific category
+	*/
+	public function getCotegoryUrlsCount($name){
+
+		$urls = Url::where('category', $name)->count();
+		echo $urls;
+	}
+
+
+
+
+
+	/*
+	* Return limited url using only from
+	*/
+	public function getLimitedUrlsUsingFrom($from){
+		$count = Url::count();
+		if($count <= $from){
+			echo "No more Data found";
+			return;
+		}
+		$limit = $count - $from; // the limit
+		$urls = Url::skip($from)->take($limit)->get();
+		echo $urls->toJson();
+	}
+
+
+
+
+	/**
+	* Display a listing of the resource.
+	*
+	* @return \Illuminate\Http\Response
+	*/
+	public function index(Request $request){
+		$urls = Url::all();
+
+		$res = new \stdClass();
+		$res->count = $urls->count();
+		foreach ($urls as $key => $value) {
+			$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+		}
+		$res->status = "success";
+		$res->data = $urls;
+		echo json_encode($res);
+	}
+
+
+
+
+
+
+	/**
+	* Returns the country analytics
+	*/
+	public function countryAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
+		$url = Url::find($id);
+
+		if(empty($url)){
+			echo 'Not Found';
+			return;
+		}
+		Utility::getUnit($unit);
+		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, country_iso_code, country'))
+		->groupBy('country_iso_code')
+		->get();
+		echo json_encode($countryData);
 		return;
+
 	}
-	$urls = Url::where('category', $name)->take($to)->skip($from)->get();
-	echo $urls->toJson();
-}
-
-
-
-/*
-* Return urls count from a specific category
-*/
-public function getCotegoryUrlsCount($name){
-
-	$urls = Url::where('category', $name)->count();
-	echo $urls;
-}
 
 
 
 
 
-/*
-* Return limited url using only from
-*/
-public function getLimitedUrlsUsingFrom($from){
-	$count = Url::count();
-	if($count <= $from){
-		echo "No more Data found";
-		return;
+
+
+	/**
+	* Display the specified resource.
+	*
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function show($id)
+	{
+		//
 	}
-	$limit = $count - $from; // the limit
-	$urls = Url::skip($from)->take($limit)->get();
-	echo $urls->toJson();
-}
 
-
-
-
-/**
-* Display a listing of the resource.
-*
-* @return \Illuminate\Http\Response
-*/
-public function index(Request $request){
-	$urls = Url::all();
-
-	$res = new \stdClass();
-	$res->count = $urls->count();
-	foreach ($urls as $key => $value) {
-		$value['time'] = $value['created_at']->diffForHumans(Carbon::now());
+	/**
+	* Show the form for editing the specified resource.
+	*
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function edit($id)
+	{
+		//
 	}
-	$res->status = "success";
-	$res->data = $urls;
-	echo json_encode($res);
-}
 
-
-
-
-
-
-/**
-* Returns the country analytics
-*/
-public function countryAnalytics(Request $request, $id, $rangeFrom, $rangeTo, $unit){
-	$url = Url::find($id);
-
-	if(empty($url)){
-		echo 'Not Found';
-		return;
+	/**
+	* Update the specified resource in storage.
+	*
+	* @param  \Illuminate\Http\Request  $request
+	* @param  int  $id
+	* @return \Illuminate\Http\Response
+	*/
+	public function update(Request $request, $id)
+	{
+		//
 	}
-	Utility::getUnit($unit);
-	$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-	->select(\DB::raw('count(*) as count, country_iso_code, country'))
-	->groupBy('country_iso_code')
-	->get();
-	echo json_encode($countryData);
-	return;
-
-}
-
-
-
-
-
-
-
-/**
-* Display the specified resource.
-*
-* @param  int  $id
-* @return \Illuminate\Http\Response
-*/
-public function show($id)
-{
-	//
-}
-
-/**
-* Show the form for editing the specified resource.
-*
-* @param  int  $id
-* @return \Illuminate\Http\Response
-*/
-public function edit($id)
-{
-	//
-}
-
-/**
-* Update the specified resource in storage.
-*
-* @param  \Illuminate\Http\Request  $request
-* @param  int  $id
-* @return \Illuminate\Http\Response
-*/
-public function update(Request $request, $id)
-{
-	//
-}
 
 }

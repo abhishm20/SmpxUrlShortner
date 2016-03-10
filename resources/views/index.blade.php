@@ -56,11 +56,14 @@
 						</div>
 						<hr>
 						<div class="row">
-							<div class="col-md-3">
+							<div class="col-md-5">
 								<div class="dropdown">
 									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 										Category : @{{urlFilterData.category}}
 										<span class="caret"></span>
+									</button>
+									<button class="btn btn-sm btn-default" @click="analyseCategory()" type="button" >
+										Analyse Category
 									</button>
 									<ul id="categoryOut" class="dropdown-menu" aria-labelledby="dropdownMenu1">
 										<li><a v-on:click.prevent="setUrlFilterCategory()" href="#">All</a></li>
@@ -70,9 +73,10 @@
 										</li>
 									</ul>
 								</div>
+
 							</div>
 
-							<div class="col-md-3">
+							<div class="col-md-2">
 								<div class="dropdown">
 									<button class="btn btn-sm btn-default dropdown-toggle" id="categoryOutName" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 										Sort : @{{urlFilterData.sortName}}
@@ -95,7 +99,7 @@
 								</div>
 							</div>
 
-							<div class="col-md-3">
+							<div class="col-md-2">
 								<div class="checkbox">
 									<label>
 										<input id="showDeleted" v-model="urlFilterData.del" @click="showDeleted" type="checkbox"> Show Deleted

@@ -51,6 +51,30 @@ var elixir = require('laravel-elixir');
          "analytics.js"
      ], 'public/assets/js/analytics.js');
 
+     // Styles for analytics page
+     mix.styles([
+         "bootstrap.min.css",
+         "styles.css",
+         "daterangepicker.css",
+         "morris.css",
+         "jqvmap.css"
+     ], 'public/assets/css/catAnalytics.css');
+
+     // Scripts for analytics page
+     mix.scripts([
+         "jquery.min.js",
+         "bootstrap.min.js",
+         "moment.min.js",
+         "daterangepicker.min.js",
+         "canvasjs.min.js",
+         "jquery.vmap.min.js",
+         "jquery.vmap.world.js",
+         "vue.js",
+         "vue-resource.min.js",
+         "catAnalytics.js"
+     ], 'public/assets/js/catAnalytics.js');
+
      // Version css and js of both pages
-     mix.version(['public/assets/js/index.js', 'public/assets/css/index.css', 'public/assets/js/analytics.js', 'public/assets/css/analytics.css']);
+     mix.version(['public/assets/js/index.js', 'public/assets/css/index.css', 'public/assets/js/analytics.js', 'public/assets/css/analytics.css'
+        , 'public/assets/js/catAnalytics.js', 'public/assets/css/catAnalytics.css']);
  });

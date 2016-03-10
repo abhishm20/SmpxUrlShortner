@@ -19,6 +19,9 @@ use Illuminate\Http\Request;
  Route::get('/analytics', function(){
    return view('analytics');
  });
+ Route::get('/category/analytics', function(){
+   return view('categoryAnalytics');
+ });
 
  Route::get('/demo', function(Request $request){
      $time = time();
@@ -37,6 +40,18 @@ use Illuminate\Http\Request;
 
  // Returns the total available categories of Url and their count
  Route::get('/urls/categories', 'UrlController@getCategories');
+
+ // Return Category Click analytics Data of an url
+ Route::get('/category/{category}/url/analytics/click', 'UrlController@getCategoryClickAnalytics');
+
+ // Return Category Click analytics Data of an url
+ Route::get('/category/{category}/url/analytics/platform', 'UrlController@getCategoryPlatformAnalytics');
+
+ // Return Category Click analytics Data of an url
+ Route::get('/category/{category}/url/analytics/referrer', 'UrlController@getCategoryReferrerAnalytics');
+
+ // Return Category Click analytics Data of an url
+ Route::get('/category/{category}/url/analytics/country', 'UrlController@getCategoryCountryAnalytics');
 
  // Delete (Soft-Delete) the specified url by id
  Route::get('/url/{id}/delete', 'UrlController@softDelete');
