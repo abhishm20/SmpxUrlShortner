@@ -65,6 +65,9 @@
                                 </div>
                                 <div id="countryGraph" style="height: 300px; width: 100%;"></div>
                             </div>
+                            <div class="col-md-6">
+                                <div id="cityGraph" style="height: 300px; width: 100%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

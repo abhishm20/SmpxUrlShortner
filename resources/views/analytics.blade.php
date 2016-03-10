@@ -44,7 +44,7 @@
                         <div class="container-fluid container-main">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div id="clickGraph" style="height: 400px; width: 100%;"></div>
+                                    <div id="clickGraph" style="height: 300px; width: 100%;"></div>
                                 </div>
                             </div>
                         </div>
@@ -64,6 +64,9 @@
                                     <p>Country Analysis</p>
                                 </div>
                                 <div id="countryGraph" style="height: 300px; width: 100%;"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="cityGraph" style="height: 300px; width: 100%;"></div>
                             </div>
                         </div>
                     </div>

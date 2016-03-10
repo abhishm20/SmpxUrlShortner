@@ -73,6 +73,40 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
 
     }
 });
+var cityGraph = new CanvasJS.Chart("cityGraph", {
+    title:{
+        text:"City Graph",
+        fontSize: 20
+    },
+    animationEnabled: true,
+    zoomEnabled: true,
+    exportEnabled: true,
+    exportFileName: "OS Graph",
+    axisX:{
+        interval: 1,
+        gridThickness: 0,
+        labelFontSize: 10,
+        labelFontStyle: "normal",
+        labelFontWeight: "normal",
+        labelFontFamily: "Lucida Sans Unicode"
+
+    },
+    axisY2:{
+        interlacedColor: "rgba(1,77,101,.2)",
+        gridColor: "rgba(1,77,101,.1)"
+
+    },
+    data: [
+        {
+            type: "bar",
+            name: "companies",
+            axisYType: "secondary",
+            color: "#014D65",
+            dataPoints: []
+        }
+
+    ]
+});
 var osGraph = new CanvasJS.Chart("osGraph", {
     title:{
         text:"OS Graph",
@@ -152,6 +186,7 @@ var vm = new Vue({
             t: '',
             u: 'dt'
         },
+        cityData: {},
         clickData: {},
         countryData: {},
         osData: {},
@@ -206,6 +241,16 @@ var vm = new Vue({
                 osGraph.render();
             });
         },
+        getCityAnalytics: function(){
+            this.$http.get('url/'+this.queryId+'/analytics/city?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+                this.cityData = res.data.data;
+                cityData.options.data[0].dataPoints = [];
+                for (pf of this.cityData) {
+                    cityGraph.options.data[0].dataPoints.push({y : parseInt(pf['count']), label: pf['platform']});
+                }
+                cityGraph.render();
+            });
+        },
         getReferrerAnalytics: function(){
             this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.referrerData = res.data.data;
@@ -229,6 +274,7 @@ var vm = new Vue({
             this.getOsAnalytics();
             this.getReferrerAnalytics();
             this.getCountryAnalytics();
+            this.getCityAnalytics();
         },
         initiateDateRangePicker: function(){
             var self = this;
