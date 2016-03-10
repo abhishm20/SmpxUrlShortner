@@ -622,6 +622,167 @@ class UrlController extends Controller
 		return response()->json($res, 200);
 	}
 
+	/**
+	* Returns the url Platform analytics data
+	*/
+	public function getPlatformAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
+		}
+
+		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, platform'))
+		->groupBy('platform')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $platformData;
+		return response()->json($res, 200);
+	}
+
+
+	/**
+	* Returns the url Referrer analytics data
+	*/
+	public function getReferrerAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
+		}
+
+		//	Handle the given unit and pick the right one unit for fetching data from DB
+		Utility::getUnit($unit);
+
+		$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, referrers'))
+		->groupBy('referrers')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $referrerData;
+		return response()->json($res, 200);
+
+	}
+
+
+	/**
+	* Returns the url Country analytics data
+	*/
+	public function getCountryAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
+		}
+
+		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+		->select(\DB::raw('count(*) as count, country_iso_code'))
+		->groupBy('country_iso_code')
+		->get();
+
+		//response data
+		$resultData = array();
+		foreach ($countryData as $key => $value) {
+			$resultData[$value['country_iso_code']] = $value['count'];
+		}
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $resultData;
+		return response()->json($res, 200);
+
+	}
+
+
+	/**
+	* Returns the url Country analytics data
+	*/
+	public function getCityAnalytics(Request $request, $id){
+		// validate the Url Id
+		if(!preg_match('/^[1-9][0-9]*$/', $id)){
+			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
+			return response()->json($error, 400);
+		}
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		//	Fetch Url instance from DB
+		$url = Url::find($id);
+
+		// Validate Fetch Url
+		if(empty($url)){
+			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
+			return response()->json($error, 404);
+		}
+
+		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+		->select(\DB::raw('count(*) as count, city, country'))
+		->groupBy('city')
+		->get();
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $platformData;
+		return response()->json($res, 200);
+	}
 
 	/**
 	* Returns the url Clicks analytics data
@@ -821,133 +982,6 @@ class UrlController extends Controller
 		return response()->json($res, 200);
 	}
 
-
-
-	/**
-	* Returns the url Platform analytics data
-	*/
-	public function getPlatformAnalytics(Request $request, $id){
-		// validate the Url Id
-		if(!preg_match('/^[1-9][0-9]*$/', $id)){
-			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
-			return response()->json($error, 400);
-		}
-
-		$rangeTo = Input::get('t');
-		$rangeFrom = Input::get('f');
-		//	No use Unit here
-		$unit = Input::get('u');
-
-
-		//	Fetch Url instance from DB
-		$url = Url::find($id);
-
-		// Validate Fetch Url
-		if(empty($url)){
-			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
-			return response()->json($error, 404);
-		}
-
-		$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-		->select(\DB::raw('count(*) as count, platform'))
-		->groupBy('platform')
-		->get();
-
-		//	Build response object
-		$res = new \stdClass();
-		$res->status = "Success";
-		$res->data = $platformData;
-		return response()->json($res, 200);
-	}
-
-
-	/**
-	* Returns the url Referrer analytics data
-	*/
-	public function getReferrerAnalytics(Request $request, $id){
-		// validate the Url Id
-		if(!preg_match('/^[1-9][0-9]*$/', $id)){
-			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
-			return response()->json($error, 400);
-		}
-
-		$rangeTo = Input::get('t');
-		$rangeFrom = Input::get('f');
-		//	No use Unit here
-		$unit = Input::get('u');
-
-
-		//	Fetch Url instance from DB
-		$url = Url::find($id);
-
-		// Validate Fetch Url
-		if(empty($url)){
-			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
-			return response()->json($error, 404);
-		}
-
-		//	Handle the given unit and pick the right one unit for fetching data from DB
-		Utility::getUnit($unit);
-
-		$referrerData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
-		->select(\DB::raw('count(*) as count, referrers'))
-		->groupBy('referrers')
-		->get();
-
-		//	Build response object
-		$res = new \stdClass();
-		$res->status = "Success";
-		$res->data = $referrerData;
-		return response()->json($res, 200);
-
-	}
-
-
-	/**
-	* Returns the url Country analytics data
-	*/
-	public function getCountryAnalytics(Request $request, $id){
-		// validate the Url Id
-		if(!preg_match('/^[1-9][0-9]*$/', $id)){
-			$error = Utility::getError(null, 400, 'Error', 'Invalid Url Id');
-			return response()->json($error, 400);
-		}
-
-		$rangeTo = Input::get('t');
-		$rangeFrom = Input::get('f');
-		//	No use Unit here
-		$unit = Input::get('u');
-
-
-		//	Fetch Url instance from DB
-		$url = Url::find($id);
-
-		// Validate Fetch Url
-		if(empty($url)){
-			$error = Utility::getError(null, 404, 'Error', 'Url Not Found');
-			return response()->json($error, 404);
-		}
-
-		$countryData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
-		->select(\DB::raw('count(*) as count, country_iso_code'))
-		->groupBy('country_iso_code')
-		->get();
-
-		//response data
-		$resultData = array();
-		foreach ($countryData as $key => $value) {
-			$resultData[$value['country_iso_code']] = $value['count'];
-		}
-
-		//	Build response object
-		$res = new \stdClass();
-		$res->status = "Success";
-		$res->data = $resultData;
-		return response()->json($res, 200);
-
-	}
-
-
 	/**
 	* Returns the url Platform analytics data
 	*/
@@ -1060,6 +1094,45 @@ class UrlController extends Controller
 
 	}
 
+	/**
+	* Returns the url Country analytics data
+	*/
+	public function getCategoryCityAnalytics(Request $request, $category){
+
+		$rangeTo = Input::get('t');
+		$rangeFrom = Input::get('f');
+		//	No use Unit here
+		$unit = Input::get('u');
+
+
+		if(!strcmp($category, 'all')){
+			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			->select(\DB::raw('count(*) as count, city, country'))
+			->groupBy('city')
+			->get();
+		}else{
+			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
+			->select(\DB::raw('count(*) as count, city, country'))
+			->groupBy('city')
+			->get();
+		}
+
+
+		//response data
+		$resultData = array();
+		foreach ($countryData as $key => $value) {
+			$resultData[$value['country_iso_code']] = $value['count'];
+		}
+
+		//	Build response object
+		$res = new \stdClass();
+		$res->status = "Success";
+		$res->data = $resultData;
+		return response()->json($res, 200);
+
+	}
 
 
 
