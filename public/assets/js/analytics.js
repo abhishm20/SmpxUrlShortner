@@ -11786,6 +11786,7 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
         fontSize: 20
     },
     animationEnabled: true,
+    zoomEnabled: true,
     exportEnabled: true,
     exportFileName: "Click Graph",
     toolTip: {
@@ -11835,6 +11836,7 @@ var osGraph = new CanvasJS.Chart("osGraph", {
         fontSize: 20
     },
     animationEnabled: true,
+    zoomEnabled: true,
     exportEnabled: true,
     exportFileName: "OS Graph",
     axisX:{
@@ -11869,6 +11871,7 @@ var referrerGraph = new CanvasJS.Chart("referrerGraph", {
         fontSize: 20
     },
     animationEnabled: true,
+    zoomEnabled: true,
     exportEnabled: true,
     exportFileName: "Referrer Graph",
     axisX:{
