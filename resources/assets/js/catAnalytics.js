@@ -254,7 +254,7 @@ var vm = new Vue({
         getCityAnalytics: function(){
             this.$http.get(this.queryCat+'/url/analytics/city?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.cityData = res.data.data;
-                cityData.options.data[0].dataPoints = [];
+                cityGraph.options.data[0].dataPoints = [];
                 for (pf of this.cityData) {
                     cityGraph.options.data[0].dataPoints.push({y : parseInt(pf['count']), label: pf['platform']});
                 }
