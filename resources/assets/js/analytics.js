@@ -246,7 +246,7 @@ var vm = new Vue({
                 this.cityData = res.data.data;
                 cityGraph.options.data[0].dataPoints = [];
                 for (pf of this.cityData) {
-                    cityGraph.options.data[0].dataPoints.push({y : parseInt(pf['count']), label: pf['platform']});
+                    cityGraph.options.data[0].dataPoints.push({y : parseInt(pf['count']), label: pf['city']});
                 }
                 cityGraph.render();
             });
