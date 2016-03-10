@@ -44,7 +44,7 @@
                         <div class="container-fluid container-main">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div id="clickGraph" style="height: 300px; width: 100%;"></div>
+                                    <div id="clickGraph" style="height: 400px; width: 100%;"></div>
                                 </div>
                             </div>
                         </div>

@@ -11787,6 +11787,7 @@ var clickGraph = new CanvasJS.Chart("clickGraph",{
     },
     animationEnabled: true,
     zoomEnabled: true,
+    zoomType: "xy",
     exportEnabled: true,
     exportFileName: "Click Graph",
     toolTip: {
