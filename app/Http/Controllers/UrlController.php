@@ -1106,13 +1106,13 @@ class UrlController extends Controller
 
 
 		if(!strcmp($category, 'all')){
-			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			$cityData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
 			->get();
 		}else{
-			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			$cityData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
@@ -1122,7 +1122,7 @@ class UrlController extends Controller
 		//	Build response object
 		$res = new \stdClass();
 		$res->status = "Success";
-		$res->data = $resultData;
+		$res->data = $cityData;
 		return response()->json($res, 200);
 
 	}
