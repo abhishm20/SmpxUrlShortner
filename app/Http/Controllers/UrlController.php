@@ -1106,12 +1106,14 @@ class UrlController extends Controller
 
 
 		if(!strcmp($category, 'all')){
-			$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
+			->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
 			->get();
 		}else{
-			$platformData = $url->hits()->whereBetween('created_at', array( $rangeFrom , $rangeTo))
+			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')->where('category',$category)
+			->whereBetween('created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, city, country'))
 			->groupBy('city')
 			->get();
