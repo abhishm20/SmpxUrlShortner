@@ -165,13 +165,22 @@ var vm = new Vue({
             name = 'cat';
             var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
             results = regex.exec(url);
-            if (!results) this.queryCat = 'all';
-            else if (!results[2]) {this.queryCat = 'all';
-            this.queryCat = decodeURIComponent(results[2].replace(/\+/g, " "));}
-            if(!this.queryCat){
+            if (!results){
                 this.queryCat = 'all';
+                this.initiateDateRangePicker();
+                return;
+            }else if (!results[2]) {
+                this.queryCat = 'all';
+                this.initiateDateRangePicker();
+                return;
+            }else{
+                this.queryCat = decodeURIComponent(results[2].replace(/\+/g, " "));
+                this.initiateDateRangePicker();
+                return;
+
             }
-            this.initiateDateRangePicker();
+
+
         },
         changeUnit: function(unit){
             this.filterData.u = unit;

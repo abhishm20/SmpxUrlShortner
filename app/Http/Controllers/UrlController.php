@@ -633,7 +633,7 @@ class UrlController extends Controller
 
 		Utility::getUnit($unit);
 
-		if($category == 'all'){
+		if(!strcmp($category, 'all')){
 			$clickSessionCount = Url::join('hits', 'urls.id', '=', 'hits.url_id')
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo)) // Optional: downgrade to non-eloquent builder so we don't build invalid User objects.
 			->distinct('session_id')->count('hits.session_id');
@@ -958,7 +958,7 @@ class UrlController extends Controller
 		//	No use Unit here
 		$unit = Input::get('u');
 
-		if($category == 'all'){
+		if(!strcmp($category, 'all')){
 			$platformData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, platform'))
@@ -996,7 +996,7 @@ class UrlController extends Controller
 		//	Handle the given unit and pick the right one unit for fetching data from DB
 		Utility::getUnit($unit);
 
-		if($category == 'all'){
+		if(!strcmp($category, 'all')){
 			$referrerData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))
 			->select(\DB::raw('count(*) as count, referrers'))
@@ -1031,7 +1031,7 @@ class UrlController extends Controller
 		$unit = Input::get('u');
 
 
-		if($category == 'all'){
+		if(!strcmp($category, 'all')){
 			$countryData = Url::join('hits', 'urls.id', '=', 'hits.url_id')
 			->whereBetween('hits.created_at', array( $rangeFrom , $rangeTo))->distinct('country_iso_code')
 			->select(\DB::raw('count(*) as count, country_iso_code'))

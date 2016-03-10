@@ -24,10 +24,7 @@ use Illuminate\Http\Request;
  });
 
  Route::get('/demo', function(Request $request){
-     $time = time();
-
-    //echo date_default_timezone_get();
-     echo date('c');
+     echo strcmp('a','a');
      return;
  });
 
