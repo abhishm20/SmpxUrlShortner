@@ -50,6 +50,9 @@ use Illuminate\Http\Request;
  // Return Category Click analytics Data of an url
  Route::get('/category/{category}/url/analytics/country', 'UrlController@getCategoryCountryAnalytics');
 
+ // Return Category Click analytics Data of an url
+ Route::get('/category/{category}/url/analytics/city', 'UrlController@getCategoryCityAnalytics');
+
  // Delete (Soft-Delete) the specified url by id
  Route::get('/url/{id}/delete', 'UrlController@softDelete');
 
@@ -68,7 +71,8 @@ use Illuminate\Http\Request;
  // Return country analytics Data of an url
  Route::get('/url/{id}/analytics/country', 'UrlController@getCountryAnalytics');
 
-
+ // Return country analytics Data of an url
+ Route::get('/url/{id}/analytics/city', 'UrlController@getCityAnalytics');
 
 
  // Returns the total Url data comes within the specified range, with pagination
