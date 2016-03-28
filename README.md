@@ -15,14 +15,14 @@ eg: 'ipdb' => env('IP_DB', '<Relative Path>/GeoIp/GeoLite2-City.mmdb')
 
 1. Goto config/app.php
 2. set url to the location of the Hostname <br />
-eg: 'url' => 'http://brainboxapp.com:8000'
+eg: 'url' => 'localhost:8000'
 
 
 # Configuration of Mysql Database
 
 1. Goto /.env
 2. set followings as required: <br />
-    DB_HOST=127.0.0.1
-    DB_DATABASE=smpxto
-    DB_USERNAME=root
-    DB_PASSWORD=ainaa
+    DB_HOST=<db-hostname> <br />
+    DB_DATABASE=<db-name> <br />
+    DB_USERNAME=<db-username> <br />
+    DB_PASSWORD=<db-password> <br />
