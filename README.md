@@ -22,7 +22,7 @@ eg: 'url' => 'localhost:8000'
 
 1. Goto /.env
 2. set followings as required: <br />
-    DB_HOST=<db-hostname> <br />
-    DB_DATABASE=<db-name> <br />
-    DB_USERNAME=<db-username> <br />
-    DB_PASSWORD=<db-password> <br />
+    DB_HOST= <br />
+    DB_DATABASE= <br />
+    DB_USERNAME= <br />
+    DB_PASSWORD= <br />
