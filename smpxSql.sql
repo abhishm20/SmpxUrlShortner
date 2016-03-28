@@ -1,19 +1,16 @@
-create database smpxUrlShortner;
-use smpxUrlShortner;
-
 CREATE TABLE `urls` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `short_url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `long_url` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_active` tinyint(1) NOT NULL,
   `clicks` bigint(20) NOT NULL,
   `category` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `urls_short_url_unique` (`short_url`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 CREATE TABLE `hits` (
@@ -21,7 +18,7 @@ CREATE TABLE `hits` (
   `platform` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `device` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `browser` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `language` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `cookie_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -35,7 +32,7 @@ CREATE TABLE `hits` (
   `city` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `state` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `country` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `country_iso_code` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+  `country_iso_code` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `url_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `hits_url_id_index` (`url_id`)

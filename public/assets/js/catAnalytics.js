@@ -11865,6 +11865,7 @@ var cityGraph = new CanvasJS.Chart("cityGraph", {
 
     ]
 });
+
 var osGraph = new CanvasJS.Chart("osGraph", {
     title:{
         text:"OS Graph",
@@ -11938,13 +11939,13 @@ var referrerGraph = new CanvasJS.Chart("referrerGraph", {
 var vm = new Vue({
     el: '#app',
     data: {
-        queryId: "",
+        queryCat: "",
         filterData:{
             f: '',
             t: '',
             u: 'dt'
         },
-        cityData: {},
+        cityData:{},
         clickData: {},
         countryData: {},
         osData: {},
@@ -11955,23 +11956,32 @@ var vm = new Vue({
     methods:{
         setUrl: function(){
             var url = window.location.href;
-            name = 'id';
+            name = 'cat';
             var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
             results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            this.queryId = decodeURIComponent(results[2].replace(/\+/g, " "));
-            this.$http.get('url/'+this.queryId).then(function(res){
-                this.currentUrl = res.data.data;
+            if (!results){
+                this.queryCat = 'all';
                 this.initiateDateRangePicker();
-            });
+                return;
+            }else if (!results[2]) {
+                this.queryCat = 'all';
+                this.initiateDateRangePicker();
+                return;
+            }else{
+                this.queryCat = decodeURIComponent(results[2].replace(/\+/g, " "));
+                this.initiateDateRangePicker();
+                return;
+
+            }
+
+
         },
         changeUnit: function(unit){
             this.filterData.u = unit;
             this.drawGraphs();
         },
         getClickAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/click?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+            this.$http.get(this.queryCat+'/url/analytics/click?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.clickData = res.data.data;
                 xValues = Object.keys(this.clickData);
                 clickGraph.options.data[0].dataPoints = [];
@@ -11990,7 +12000,7 @@ var vm = new Vue({
             });
         },
         getOsAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/platform?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+            this.$http.get(this.queryCat+'/url/analytics/platform?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.osData = res.data.data;
                 osGraph.options.data[0].dataPoints = [];
                 for (pf of this.osData) {
@@ -12000,7 +12010,7 @@ var vm = new Vue({
             });
         },
         getCityAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/city?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+            this.$http.get(this.queryCat+'/url/analytics/city?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.cityData = res.data.data;
                 cityGraph.options.data[0].dataPoints = [];
                 for (pf of this.cityData) {
@@ -12010,7 +12020,7 @@ var vm = new Vue({
             });
         },
         getReferrerAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+            this.$http.get(this.queryCat+'/url/analytics/referrer?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.referrerData = res.data.data;
                 referrerGraph.options.data[0].dataPoints = [];
                 for (referrer of this.referrerData) {
@@ -12020,7 +12030,7 @@ var vm = new Vue({
             });
         },
         getCountryAnalytics: function(){
-            this.$http.get('url/'+this.queryId+'/analytics/country?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
+            this.$http.get(this.queryCat+'/url/analytics/country?u='+this.filterData.u+'&f='+this.filterData.f+'&t='+this.filterData.t).then(function(res){
                 this.countryData = res.data.data;
 
                 countryGraph.values = this.countryData;
@@ -12069,4 +12079,4 @@ var vm = new Vue({
 
 });
 
-//# sourceMappingURL=analytics.js.map
+//# sourceMappingURL=catAnalytics.js.map

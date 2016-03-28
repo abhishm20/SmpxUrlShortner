@@ -1,3 +1,1 @@
-public/assets/*
-public/build/*
-config/app.php
+vendor/*
